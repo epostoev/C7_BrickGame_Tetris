@@ -92,7 +92,7 @@ This FSM has the following states:
 - Spawn is the state the game enters when you create another block and select the next block to spawn.
 - Moving is the main game state with user input processing — rotating blocks/moving blocks horizontally.
 - Move is the state the game enters after the timer runs out. It moves the current block down one level.
-- Attaching is the state the game enters after the current block "touches" the already fallen blocks or the ground. If full rows are created, it is destroyed and the remaining blocks are moved down. If a block is stopped in the top row, the game enters the "game over" state.
+- Attaching is the state the game enters after the current block "touches" the already fallen blocks or the ground. If full rows are created, they are destroyed and the remaining blocks are moved down. If a block is stopped in the top row, the game enters the "game over" state.
 - Game over is the end of the game.
 
 ## Chapter II <div id="chapter-ii"></div>
