@@ -27,16 +27,29 @@ void drawStateInfo(GameInfo_t state_info) {
   for (int i = 0; i < 20; i++) {
     for (int j = 0; j < 10; j++) {
       if (state_info.field[i][j]) {
-        mvprintw(i, j , "%s", "[]");
+        mvprintw(i, j * 2, "%s", "[]");
       } else {
-        mvprintw(i, j , "%s", ". ");
+        mvprintw(i, j * 2, "%s", ". ");
       }
     }
   }
   // 1.Отрисовка next;
+  mvprintw(6, 21, "%s", "Next:");
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      if (state_info.next[i][j]) {
+        mvprintw(i + 7, (21 + j * 2), "%s", "[] ");
+      } else {
+        mvprintw(i + 7, (21 + j * 2), "%s", ". ");
+      }
+    }
+  }
 
   // 2.Отрисовка статистики с данными
-  mvprintw(0, 20, "level = %d", state_info.level);
+  mvprintw(0, 21, "Score = %d", state_info.score);
+  mvprintw(1, 21, "High score = %d", state_info.high_score);
+  mvprintw(2, 21, "Level = %d", state_info.level);
+  mvprintw(3, 21, "Speed = %d", state_info.speed);
 
   // 3.Отрисовка легенды
 }
