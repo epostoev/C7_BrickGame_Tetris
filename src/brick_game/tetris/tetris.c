@@ -1,28 +1,5 @@
 #include "tetris.h"
 
-typedef struct {
-  int** field;
-  int** next;
-  int score;
-  int high_score;
-  int level;
-  int speed;
-  //2. int** current_figure;
-  //3. int x;
-  //4. int y;
-} TetrisState_t;
-
-typedef enum {
-  figure_I,
-  figure_O,
-  figure_L,
-  figure_J,
-  figure_S,
-  figure_T,
-  figure_Z,
-  count_figure,
-} TypeFigure_t;
-
 TetrisState_t* getTetrisInfo() {
   // 4.Создание массива field;
   static int field[20][10] = {0};
@@ -55,19 +32,25 @@ void clearNext() {
   }
 }
 
+void drawFigureI(int** next) {
+  next[2][0] = 1;                 // . . . .
+  next[2][1] = 1;                 // . . . .
+  next[2][2] = 1;                 // [][][][]
+  next[2][3] = 1;                 // . . . .
+};
 void drawFigureO(int** next) {
   next[1][1] = 1;
   next[1][2] = 1;
   next[2][1] = 1;
   next[2][2] = 1;
 };
-void drawFigureI(int** next) {
+void drawFigureL(int** next) {
   next[2][0] = 1;
   next[2][1] = 1;
   next[2][2] = 1;
-  next[2][3] = 1;
+  next[1][2] = 1;
 };
-void drawFigureL(int** next) {
+void drawFigureJ(int** next) {
   next[2][0] = 1;
   next[2][1] = 1;
   next[2][2] = 1;
@@ -93,12 +76,12 @@ void generateFigure() {
   if (next_empty) {
     type_figure = rand() % 3;
     get_figure[type_figure](state->next);
-	next_empty = false;
+    next_empty = false;
   }
-  //5. задаем начальные координаты x, y. (для current)
+  // 5. задаем начальные координаты x, y. (для current)
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
-		// 6. копирование в current
+      // 6. копирование в current
       state->field[i][j] = state->next[i][j];
     }
   }
@@ -112,8 +95,8 @@ GameInfo_t updateCurrentState() {
   GameInfo_t current_state = {0};
   TetrisState_t* state = getTetrisInfo();
 
-// 7.перенести фигуру из current на field с учетом координат
-// и проверкой можем ли мы находиться в этих координатах 
+  // 7.перенести фигуру из current на field с учетом координат
+  // и проверкой можем ли мы находиться в этих координатах
   current_state.score = state->score;
   current_state.high_score = state->high_score;
   current_state.level = state->level;
