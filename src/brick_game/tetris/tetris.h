@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <time.h>
+#include <ncurses.h>
 
 #include "../brick_game.h"
 

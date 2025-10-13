@@ -33,28 +33,28 @@ void clearNext() {
 }
 
 void drawFigureI(int** next) {
-  next[2][0] = 1;                 // . . . .
-  next[2][1] = 1;                 // . . . .
-  next[2][2] = 1;                 // [][][][]
-  next[2][3] = 1;                 // . . . .
+  next[2][0] = 1;				// . . . .
+  next[2][1] = 1;				// . . . .
+  next[2][2] = 1;				// [][][][]
+  next[2][3] = 1;				// . . . .
 };
 void drawFigureO(int** next) {
-  next[1][1] = 1;
-  next[1][2] = 1;
-  next[2][1] = 1;
-  next[2][2] = 1;
+  next[1][1] = 1;				// . . . .
+  next[1][2] = 1;				// . [][].
+  next[2][1] = 1;				// . [][].
+  next[2][2] = 1;				// . . . .
 };
 void drawFigureL(int** next) {
-  next[2][0] = 1;
-  next[2][1] = 1;
-  next[2][2] = 1;
+  next[2][0] = 1;				// . . . .
+  next[2][1] = 1;				// . . [].
+  next[2][2] = 1;				// [][][].
   next[1][2] = 1;
 };
 void drawFigureJ(int** next) {
-  next[2][0] = 1;
-  next[2][1] = 1;
-  next[2][2] = 1;
-  next[1][2] = 1;
+  next[2][0] = 1;				// . . . .
+  next[2][1] = 1;				// . []. .
+  next[2][2] = 1;				// . [][][]
+  next[1][2] = 1;				// . . . .
 };
 
 // 1. Дописать все фигуры;
@@ -71,11 +71,20 @@ void generateFigure() {
   //     drawFigureL(state->next);
   //   }
   void (*const get_figure[count_figure])(int**) = {drawFigureO, drawFigureI,
-                                                   drawFigureL};
+                                                   drawFigureL, drawFigureJ};
   static bool next_empty = true;
   if (next_empty) {
-    type_figure = rand() % 3;
+    // type_figure = rand() % ;
+    type_figure = 2;
     get_figure[type_figure](state->next);
+
+    mvprintw(23, 0, "BEFORE idx=%d fn=%p next=%p next[0]=%p",
+             (int)type_figure,
+             (void*)get_figure[type_figure],
+             (void*)state->next,
+             (void*)state->next[0]);
+    refresh();
+
     next_empty = false;
   }
   // 5. задаем начальные координаты x, y. (для current)
@@ -86,8 +95,14 @@ void generateFigure() {
     }
   }
   clearNext();
-  type_figure = rand() % 3;
+//   type_figure = rand() % 3;
+  type_figure = 2;
   get_figure[type_figure](state->next);
+
+      mvprintw(24, 0, "AFTER  n[2][0..3]=%d %d %d %d",
+             state->next[2][0], state->next[2][1],
+             state->next[2][2], state->next[2][3]);
+    refresh();
 }
 
 GameInfo_t updateCurrentState() {
