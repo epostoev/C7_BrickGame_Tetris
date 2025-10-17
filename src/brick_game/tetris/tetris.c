@@ -38,23 +38,41 @@ void drawFigureI(int** next) {
   next[2][2] = 1;				// [][][][]
   next[2][3] = 1;				// . . . .
 };
+void drawFigureJ(int** next) {
+  next[1][0] = 1;				// . . . .
+  next[2][0] = 1;				// []. . .
+  next[2][1] = 1;				// [][][].
+  next[2][2] = 1;				// . . . .
+};
+void drawFigureL(int** next) {
+  next[1][2] = 1;				// . . . .
+  next[2][0] = 1;				// . . [].
+  next[2][1] = 1;				// [][][].
+  next[2][2] = 1;       // . . . .
+};
 void drawFigureO(int** next) {
   next[1][1] = 1;				// . . . .
   next[1][2] = 1;				// . [][].
   next[2][1] = 1;				// . [][].
   next[2][2] = 1;				// . . . .
 };
-void drawFigureL(int** next) {
-  next[2][0] = 1;				// . . . .
-  next[2][1] = 1;				// . . [].
-  next[2][2] = 1;				// [][][].
-  next[1][2] = 1;
+void drawFigureS(int** next) {
+  next[1][1] = 1;				// . . . .
+  next[1][2] = 1;				// . [][].
+  next[2][0] = 1;				// [][]. .
+  next[2][1] = 1;				// . . . .
 };
-void drawFigureJ(int** next) {
-  next[2][0] = 1;				// . . . .
-  next[2][1] = 1;				// . []. .
-  next[2][2] = 1;				// . [][][]
-  next[1][2] = 1;				// . . . .
+void drawFigureT(int** next) {
+  next[1][1] = 1;				// . . . .
+  next[2][0] = 1;				// . []. .
+  next[2][1] = 1;				// [][][] .
+  next[2][2] = 1;				// . . . .
+};
+void drawFigureZ(int** next) {
+  next[1][0] = 1;				// . . . .
+  next[1][1] = 1;				// [][] . .
+  next[2][1] = 1;				// . [][].
+  next[2][2] = 1;				// . . . .
 };
 
 // 1. Дописать все фигуры;
@@ -62,27 +80,14 @@ void drawFigureJ(int** next) {
 void generateFigure() {
   TetrisState_t* state = getTetrisInfo();
   TypeFigure_t type_figure;
-  //   clearNext();
-  //   if (type_figure == figure_O) {
-  //     drawFigureO(state->next);
-  //   } else if (type_figure == figure_I) {
-  //     drawFigureI(state->next);
-  //   } else if (type_figure == figure_L) {
-  //     drawFigureL(state->next);
-  //   }
   void (*const get_figure[count_figure])(int**) = {drawFigureO, drawFigureI,
-                                                   drawFigureL, drawFigureJ};
+                                                   drawFigureL, drawFigureJ,
+                                                   drawFigureS, drawFigureT,
+                                                   drawFigureZ};
   static bool next_empty = true;
   if (next_empty) {
-    // type_figure = rand() % ;
-    type_figure = 2;
+    type_figure = rand() % 7;
     get_figure[type_figure](state->next);
-
-    mvprintw(23, 0, "BEFORE idx=%d fn=%p next=%p next[0]=%p",
-             (int)type_figure,
-             (void*)get_figure[type_figure],
-             (void*)state->next,
-             (void*)state->next[0]);
     refresh();
 
     next_empty = false;
@@ -95,14 +100,9 @@ void generateFigure() {
     }
   }
   clearNext();
-//   type_figure = rand() % 3;
-  type_figure = 2;
+  type_figure = rand() % 7;
   get_figure[type_figure](state->next);
-
-      mvprintw(24, 0, "AFTER  n[2][0..3]=%d %d %d %d",
-             state->next[2][0], state->next[2][1],
-             state->next[2][2], state->next[2][3]);
-    refresh();
+  refresh();
 }
 
 GameInfo_t updateCurrentState() {
