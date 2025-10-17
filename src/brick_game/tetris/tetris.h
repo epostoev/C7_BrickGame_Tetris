@@ -1,6 +1,6 @@
+#include <ncurses.h> // УБРАТЬ ПРИ СДАЧЕ
 #include <stdlib.h>
 #include <time.h>
-#include <ncurses.h>
 
 #include "../brick_game.h"
 
@@ -11,9 +11,9 @@ typedef struct {
   int high_score;
   int level;
   int speed;
-  // 2. int** current_figure;
-  // 3. int x;
-  // 4. int y;
+  int** current;
+  int x;
+  int y;
 } TetrisState_t;
 
 typedef enum {
@@ -27,4 +27,4 @@ typedef enum {
   count_figure,
 } TypeFigure_t;
 
-int* tetris_next_row0(void);
+// Добавать обьявление функций
