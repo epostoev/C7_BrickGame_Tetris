@@ -118,7 +118,10 @@ void addCurrentInField() {
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       // Копирование в current
-      state->field[i + state->y][j + state->x] = state->current[i][j];
+      // if (state->field[i + state->y][j + state->x] == 0) {
+      if (state->current[i][j]) {
+        state->field[i + state->y][j + state->x] = state->current[i][j];
+      }
     }
   }
 }
@@ -129,7 +132,13 @@ GameInfo_t updateCurrentState() {
 
   TetrisState_t* state = getTetrisInfo();
 
-  addCurrentInField();
+  for (int i = 0; i < 20; i++) {
+    for (int j = 0; j < 10; j++) {
+        mvprintw(i + 30, j * 2, "%d", state->field[i][j]);
+    }
+  }
+
+  // addCurrentInField();
 
   current_state.score = state->score;
   current_state.high_score = state->high_score;
@@ -137,8 +146,8 @@ GameInfo_t updateCurrentState() {
   current_state.speed = state->speed;
   current_state.field = state->field;
   current_state.next = state->next;
-  mvprintw(23, 1, "x= %d", state->x);
-  mvprintw(24, 1, "y= %d", state->y);
+  mvprintw(23, 1, "x= %d  ", state->x);
+  mvprintw(24, 1, "y= %d  ", state->y);
   return current_state;
 }
 
@@ -151,34 +160,38 @@ void clearCurrent() {
   }
 }
 
+bool isPointOutField(int x, int y) {
+  return (x < 0 || x >= 10 || y < 0 || y >= 20);
+}
 
-static bool canPlaceAt(const TetrisState_t *st, int nx, int ny) {
+bool canPlaceAt(const TetrisState_t* state, int nx, int ny) {
   bool ok = true;
   for (int i = 0; i < 4 && ok; ++i) {
     for (int j = 0; j < 4 && ok; ++j) {
-      if (st->current[i][j]) {
+      if (state->current[i][j]) {
         int x = nx + j, y = ny + i;
-        if (x < 0 || x >= 10 || y < 0 || y >= 20) 
-        {ok = false;
+        mvprintw(26, 1, "isPointOutField %d  ", isPointOutField(x, y));
+        mvprintw(27, 1, "state->field[5][5] %d  ", state->field[5][5]);
+        mvprintw(28, 1, "x = %d  ", x);
+        mvprintw(29, 1, "y = %d  ", y);
+        if (isPointOutField(x, y) || (state->field[y][x])) {
+          ok = false;  // 1. Переименовать переменную ol
         }
-        else if (st->field[y][x])               ok = false;
       }
     }
   }
   return ok;
 }
 
-
 void moveFigureLeft() {
-  TetrisState_t* st = getTetrisInfo();
-  clearCurrent();                         // убрать старое положение
-  int nx = st->x - 1;                     // кандидатная позиция
-  if (canPlaceAt(st, nx, st->y)) {
-    st->x = nx;                           // ок — фиксируем
+  TetrisState_t* state = getTetrisInfo();
+  clearCurrent();         // убрать старое положение
+  int nx = state->x - 1;  // кандидатная позиция
+  if (canPlaceAt(state, nx, state->y)) {
+    state->x = nx;  // ок — фиксируем
   }
-  addCurrentInField();                    // дорисовать обратно
+  addCurrentInField();  // дорисовать обратно
 }
-
 
 // void moveFigureLeft(){
 //   TetrisState_t* state = getTetrisInfo();
@@ -192,13 +205,12 @@ void moveFigureLeft() {
 //   // и отрисовываем обратно
 // }
 
-
 void moveFigureRight() {
-  TetrisState_t* st = getTetrisInfo();
+  TetrisState_t* state = getTetrisInfo();
   clearCurrent();
-  int nx = st->x + 1;
-  if (canPlaceAt(st, nx, st->y)) {
-    st->x = nx;
+  int nx = state->x + 1;
+  if (canPlaceAt(state, nx, state->y)) {
+    state->x = nx;
   }
   addCurrentInField();
 }
@@ -214,14 +226,30 @@ void moveFigureRight() {
 //   // и отрисовываем обратно
 // }
 
+// void moveFigureDown() {
+//   TetrisState_t* state = getTetrisInfo();
+//   clearCurrent();
+//   int ny = state->y + 1;
+//   if (canPlaceAt(state, state->x, ny)) {
+//     state->y = ny;  // можем опуститься
+//     mvprintw(25, 1, "canPlaceAt 1");
+//   } else {
+//     mvprintw(25, 1, "0");
+//     // сюда позже ставится "залочить" фигуру и сгенерировать следующую
+//     // lockCurrentAndSpawnNext();
+//   }
+//   addCurrentInField();
+// }
 
 void moveFigureDown() {
-  TetrisState_t* st = getTetrisInfo();
+  TetrisState_t* state = getTetrisInfo();
   clearCurrent();
-  int ny = st->y + 1;
-  if (canPlaceAt(st, st->x, ny)) {
-    st->y = ny;                           // можем опуститься
+  state->y += 1;
+  if (!canPlaceAt(state, state->x, state->y)) {
+    state->y -= 1;  // можем опуститься
+    mvprintw(25, 1, "canPlaceAt 1");
   } else {
+    mvprintw(25, 1, "canPlaceAt 0");
     // сюда позже ставится "залочить" фигуру и сгенерировать следующую
     // lockCurrentAndSpawnNext();
   }
@@ -239,8 +267,8 @@ void moveFigureDown() {
 //   // и отрисовываем обратно
 // }
 
-// 4. Подумать как узнать конечное положение фигуры для генерации следующей фигуры
-
+// 4. Подумать как узнать конечное положение фигуры для генерации следующей
+// фигуры
 
 void userInput(UserAction_t action, bool hold) {
   if (hold == false) {
@@ -253,7 +281,7 @@ void userInput(UserAction_t action, bool hold) {
     case Up:
       state->level += 1;
       break;
-  // 1. Добаваить клавишу вниз (на 1 пиксель) (Готово)
+      // Добаваить клавишу вниз (на 1 пиксель) (Готово)
     case Down:
       moveFigureDown();
       break;

@@ -1,4 +1,4 @@
-#include <ncurses.h> // УБРАТЬ ПРИ СДАЧЕ
+#include <ncurses.h>  // УБРАТЬ ПРИ СДАЧЕ
 #include <stdlib.h>
 #include <time.h>
 
