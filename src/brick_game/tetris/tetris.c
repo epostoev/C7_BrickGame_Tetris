@@ -95,7 +95,6 @@ void generateFigure() {
     type_figure = rand() % 7;
     get_figure[type_figure](state->next);
     refresh();
-
     next_empty = false;
   }
   // Задаем начальные координаты x, y. (для current)
@@ -152,38 +151,93 @@ void clearCurrent() {
   }
 }
 
-void moveFigureLeft(){
-  TetrisState_t* state = getTetrisInfo();
-  // Стереть текущее положение фигуры на field
-  clearCurrent();
-  // изменение координат по x на -1 пиксель
-  state->x = state->x - 1;
-  // 2.Проверка можем ли мы находиться в этих координатах
-  // если да, то addCurrentInField()
-  // иначе откатываем изменение координат обратно   state->x = state->x + 1;
-  // и отрисовываем обратно
-}
-void moveFigureRight(){
-  TetrisState_t* state = getTetrisInfo();
-  clearCurrent();
-  // изменение координат по x на +1 пиксель
-  state->x = state->x + 1;
-  // 3.Проверка можем ли мы находиться в этих координатах
-  // если да, то addCurrentInField()
-  // иначе откатываем изменение координат обратно   state->x = state->x - 1;
-  // и отрисовываем обратно
+
+static bool canPlaceAt(const TetrisState_t *st, int nx, int ny) {
+  bool ok = true;
+  for (int i = 0; i < 4 && ok; ++i) {
+    for (int j = 0; j < 4 && ok; ++j) {
+      if (st->current[i][j]) {
+        int x = nx + j, y = ny + i;
+        if (x < 0 || x >= 10 || y < 0 || y >= 20) 
+        {ok = false;
+        }
+        else if (st->field[y][x])               ok = false;
+      }
+    }
+  }
+  return ok;
 }
 
- void moveFigureDown(){
-  TetrisState_t* state = getTetrisInfo();
-  clearCurrent();
-  // изменение координат по y на +1 пиксель
-  state->y = state->y + 1;
-  // 3.Проверка можем ли мы находиться в этих координатах
-  // если да, то addCurrentInField()
-  // иначе откатываем изменение координат обратно   state->y = state->y - 1;
-  // и отрисовываем обратно
+
+void moveFigureLeft() {
+  TetrisState_t* st = getTetrisInfo();
+  clearCurrent();                         // убрать старое положение
+  int nx = st->x - 1;                     // кандидатная позиция
+  if (canPlaceAt(st, nx, st->y)) {
+    st->x = nx;                           // ок — фиксируем
+  }
+  addCurrentInField();                    // дорисовать обратно
 }
+
+
+// void moveFigureLeft(){
+//   TetrisState_t* state = getTetrisInfo();
+//   // Стереть текущее положение фигуры на field
+//   clearCurrent();
+//   // изменение координат по x на -1 пиксель
+//   state->x = state->x - 1;
+//   // 2.Проверка можем ли мы находиться в этих координатах
+//   // если да, то addCurrentInField()
+//   // иначе откатываем изменение координат обратно   state->x = state->x + 1;
+//   // и отрисовываем обратно
+// }
+
+
+void moveFigureRight() {
+  TetrisState_t* st = getTetrisInfo();
+  clearCurrent();
+  int nx = st->x + 1;
+  if (canPlaceAt(st, nx, st->y)) {
+    st->x = nx;
+  }
+  addCurrentInField();
+}
+
+// void moveFigureRight(){
+//   TetrisState_t* state = getTetrisInfo();
+//   clearCurrent();
+//   // изменение координат по x на +1 пиксель
+//   state->x = state->x + 1;
+//   // 3.Проверка можем ли мы находиться в этих координатах
+//   // если да, то addCurrentInField()
+//   // иначе откатываем изменение координат обратно   state->x = state->x - 1;
+//   // и отрисовываем обратно
+// }
+
+
+void moveFigureDown() {
+  TetrisState_t* st = getTetrisInfo();
+  clearCurrent();
+  int ny = st->y + 1;
+  if (canPlaceAt(st, st->x, ny)) {
+    st->y = ny;                           // можем опуститься
+  } else {
+    // сюда позже ставится "залочить" фигуру и сгенерировать следующую
+    // lockCurrentAndSpawnNext();
+  }
+  addCurrentInField();
+}
+
+//  void moveFigureDown(){
+//   TetrisState_t* state = getTetrisInfo();
+//   clearCurrent();
+//   // изменение координат по y на +1 пиксель
+//   state->y = state->y + 1;
+//   // 3.Проверка можем ли мы находиться в этих координатах
+//   // если да, то addCurrentInField()
+//   // иначе откатываем изменение координат обратно   state->y = state->y - 1;
+//   // и отрисовываем обратно
+// }
 
 // 4. Подумать как узнать конечное положение фигуры для генерации следующей фигуры
 
@@ -199,9 +253,9 @@ void userInput(UserAction_t action, bool hold) {
     case Up:
       state->level += 1;
       break;
+  // 1. Добаваить клавишу вниз (на 1 пиксель) (Готово)
     case Down:
-    // 1. Добаваить клавишу вниз (на 1 пиксель)
-      state->level -= 1;
+      moveFigureDown();
       break;
     case Left:
       moveFigureLeft();

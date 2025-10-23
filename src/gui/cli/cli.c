@@ -33,7 +33,7 @@ void drawStateInfo(GameInfo_t state_info) {
       }
     }
   }
-  // 1.Отрисовка next;
+  // Отрисовка next;
   mvprintw(6, 21, "%s", "Next:");
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
@@ -45,7 +45,7 @@ void drawStateInfo(GameInfo_t state_info) {
     }
   }
 
-  // 2.Отрисовка статистики с данными
+  // Отрисовка статистики с данными
   mvprintw(0, 21, "Score = %d", state_info.score);
   mvprintw(1, 21, "High score = %d", state_info.high_score);
   mvprintw(2, 21, "Level = %d", state_info.level);
