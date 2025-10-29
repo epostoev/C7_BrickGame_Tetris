@@ -51,7 +51,7 @@ void drawStateInfo(GameInfo_t state_info) {
   mvprintw(2, 21, "Level = %d", state_info.level);
   mvprintw(3, 21, "Speed = %d", state_info.speed);
 
-  // 3.Отрисовка легенды
+  // Отрисовка легенды
 }
 
 bool getAction(UserAction_t *key_action) {
@@ -61,7 +61,8 @@ bool getAction(UserAction_t *key_action) {
   if (signal != ERR) {
     return_err = true;
     switch (signal) {
-      case KEY_ENTER:
+      case 10:
+	  case 13:
         *key_action = Start;
         break;
       case KEY_P_LOWER:
