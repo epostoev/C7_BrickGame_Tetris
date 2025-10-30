@@ -62,7 +62,7 @@ bool getAction(UserAction_t *key_action) {
     return_err = true;
     switch (signal) {
       case 10:
-	  case 13:
+      case 13:
         *key_action = Start;
         break;
       case KEY_P_LOWER:

@@ -4,6 +4,12 @@
 
 #include "../brick_game.h"
 
+typedef enum {
+  kStart,
+  kPause,
+  kMove,
+} FiniteState_t;
+
 typedef struct {
   int** field;
   int** next;
@@ -14,6 +20,9 @@ typedef struct {
   int** current;
   int x;
   int y;
+  FiniteState_t fsm;
+  unsigned long last_tick;
+  unsigned long update_interval;
 } TetrisState_t;
 
 typedef enum {
@@ -27,4 +36,7 @@ typedef enum {
   count_figure,
 } TypeFigure_t;
 
+unsigned long currentTimeMs();
+bool timeToShift();
+bool moveFigureDown();
 // Добавать обьявление функций

@@ -21,13 +21,18 @@ TetrisState_t* getTetrisInfo() {
   for (int i = 0; i < 4; i++) {
     current_rows[i] = current[i];
   }
-  static TetrisState_t tetris_info = {.field = rows,
-                                      .next = next_rows,
-                                      .current = current_rows,
-                                      .score = 1,
-                                      .high_score = 2,
-                                      .level = 3,
-                                      .speed = 4};
+
+  static TetrisState_t tetris_info = {
+      .field = rows,
+      .next = next_rows,
+      .current = current_rows,
+      .score = 1,
+      .high_score = 2,
+      .level = 3,
+      .speed = 4,
+      .fsm = kStart,
+      .update_interval = 1000,
+  };
 
   return &tetris_info;
 }
@@ -157,7 +162,7 @@ GameInfo_t updateCurrentState() {
     }
   }
 
-  addCurrentInField();
+  // addCurrentInField();
 
   current_state.score = state->score;
   current_state.high_score = state->high_score;
@@ -165,8 +170,11 @@ GameInfo_t updateCurrentState() {
   current_state.speed = state->speed;
   current_state.field = state->field;
   current_state.next = state->next;
-  mvprintw(23, 1, "x= %d  ", state->x);
-  mvprintw(24, 1, "y= %d  ", state->y);
+  if (state->fsm == kMove && timeToShift()) {
+    if (false == moveFigureDown()) {
+      generateFigure();
+    }
+  }
   return current_state;
 }
 
@@ -183,7 +191,7 @@ void clearCurrent() {
   TetrisState_t* state = getTetrisInfo();
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
-      if (state->current[i][j]) {  // <-- вот здесь
+      if (state->current[i][j]) {
         state->field[i + state->y][j + state->x] = 0;
       }
     }
@@ -196,18 +204,33 @@ bool canPlaceAt(const TetrisState_t* state, int nx, int ny) {
     for (int j = 0; j < 4 && ok; ++j) {
       if (state->current[i][j]) {
         int x = nx + j, y = ny + i;
-        mvprintw(26, 1, "%d", isPointOutField(x, y));
-        mvprintw(27, 1, "%d", state->field[y][x]);
-        mvprintw(28, 1, "x = %d  ", x);
-        mvprintw(29, 1, "y = %d  ", y);
-        if (isPointOutField(x, y) || (state->field[y][x])) {
-          ok = false;  // 1. Переименовать переменную ol
+        // mvprintw(26, 1, "%d", isPointOutField(x, y));
+        // mvprintw(27, 1, "%d", state->field[y][x]);
+        // mvprintw(28, 1, "x = %d  ", x);
+        // mvprintw(29, 1, "y = %d  ", y);
+        if (isPointOutField(x, y) || state->field[y][x]) {
+          ok = false;  // 1. Переименовать переменную ok
         }
       }
     }
   }
   return ok;
 }
+
+// bool canPlaceAt(const TetrisState_t* state, int nx, int ny) {
+//   bool ok = true;
+//   for (int i = 0; i < 4 && ok; ++i) {
+//     for (int j = 0; j < 4 && ok; ++j) {
+//       if (state->current[i][j]) {
+//         int x = nx + j, y = ny + i;
+//         if (isPointOutField(x, y) || state->field[y][x]) {
+//           ok = false;  // 1. Переименовать переменную ol
+//         }
+//       }
+//     }
+//   }
+//   return ok;
+// }
 
 void moveFigureLeft() {
   TetrisState_t* state = getTetrisInfo();
@@ -310,7 +333,7 @@ bool moveFigureDown() {
   TetrisState_t* state = getTetrisInfo();
   clearCurrent();
   int ny = state->y + 1;
-  int moved = false;
+  int moved = false;  // !!!! Обратить внимание !!!!
   if (canPlaceAt(state, state->x, ny)) {
     state->y = ny;
     moved = true;
@@ -326,52 +349,66 @@ bool moveFigureDown() {
 // Поворот фигуры на 90 градусов по часовой стрелке
 void rotateFigure() {
   TetrisState_t* state = getTetrisInfo();
-  
+
   // Создаём временный массив для повёрнутой фигуры
   int rotated[4][4] = {0};
-  
+
   // Алгоритм поворота: rotated[i][j] = current[3-j][i]
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       rotated[i][j] = state->current[3 - j][i];
     }
   }
-  
+
   // Сохраняем старую фигуру на случай отката
+  // 1. Написать функцию копирования двумерного массива 4*4
   int old_current[4][4];
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
-      old_current[i][j] = state->current[i][j];
+      old_current[i][j] = state->current[i][j];  // Функция комирования
     }
   }
-  
+
   // Убираем текущую фигуру с поля
   clearCurrent();
-  
+
   // Применяем поворот
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
-      state->current[i][j] = rotated[i][j];
+      state->current[i][j] = rotated[i][j];  // Функция комирования
     }
   }
-  
+
   // Проверяем, можем ли разместить повёрнутую фигуру
   if (!canPlaceAt(state, state->x, state->y)) {
     // Если нельзя, откатываем поворот
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
-        state->current[i][j] = old_current[i][j];
+        state->current[i][j] = old_current[i][j];  // Функция комирования
       }
     }
   }
-  
+
   // Рисуем фигуру обратно на поле
   addCurrentInField();
 }
 
+bool timeToShift() {
+  TetrisState_t* game = getTetrisInfo();
+  unsigned long now = currentTimeMs();
 
-// 4. Подумать как узнать конечное положение фигуры для генерации следующей
-// фигуры
+  if (now - game->last_tick >= game->update_interval) {
+    game->last_tick = now;
+    return true;  // FIXME
+  }
+  return false;
+}
+
+unsigned long currentTimeMs() {
+  struct timespec ts;
+  clock_gettime(1, &ts);
+  return (unsigned long)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+}
 
 void userInput(UserAction_t action, bool hold) {
   if (hold == false) {
@@ -379,27 +416,48 @@ void userInput(UserAction_t action, bool hold) {
   }
   // Добавить конечный автомат;
   TetrisState_t* state = getTetrisInfo();
-  switch (action) {
-    case Start:
-      generateFigure();
-      break;
-    case Up:
-      state->level += 1;
-      break;
-    case Down:
-      if (false == moveFigureDown()) {
+  // switch (action) {
+  //   case Start:
+  //     generateFigure();
+  //     break;
+  //   case Up:
+  //     state->level += 1;
+  //     break;
+  //   case Down:
+  //     if (false == moveFigureDown()) {
+  //       generateFigure();
+  //     }
+  //     break;
+  //   case Left:
+  //     moveFigureLeft();
+  //     break;
+  //   case Right:
+  //     moveFigureRight();
+  //     break;
+  //   case Action:
+  //     rotateFigure();
+  //     // Перенос на поле field и генерация следующей фигру в поле next
+  //     break;
+  //   default:
+  //     break;
+  // }
+  switch (state->fsm) {
+    case kStart:
+      if (action == Start) {
         generateFigure();
+        state->fsm = kMove;
       }
       break;
-    case Left:
-      moveFigureLeft();
-      break;
-    case Right:
-      moveFigureRight();
-      break;
-    case Action:
-      rotateFigure();
-      // Перенос на поле field и генерация следующей фигру в поле next
+    case kMove:
+      if (action == Down) {
+        moveFigureDown();
+      } else if (action == Left) {
+        moveFigureLeft();
+      } else if (action == Right) {
+        moveFigureRight();
+      } else if (action == Action) {
+        rotateFigure();
+      }
       break;
     default:
       break;
