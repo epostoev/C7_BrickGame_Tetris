@@ -39,4 +39,13 @@ typedef enum {
 unsigned long currentTimeMs();
 bool timeToShift();
 bool moveFigureDown();
+void clearCurrent();
+void addCurrentInField();
+void generateFigure();
+bool isPointOutField(int x, int y);
+bool canPlaceAt(const TetrisState_t* state, int nx, int ny);
+void rotateFigure();
+void moveFigureLeft();
+void moveFigureRight();
+TetrisState_t* getTetrisInfo();
 // Добавать обьявление функций

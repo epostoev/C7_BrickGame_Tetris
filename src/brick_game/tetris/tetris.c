@@ -22,19 +22,37 @@ TetrisState_t* getTetrisInfo() {
     current_rows[i] = current[i];
   }
 
-  static TetrisState_t tetris_info = {
-      .field = rows,
-      .next = next_rows,
-      .current = current_rows,
-      .score = 1,
-      .high_score = 2,
-      .level = 3,
-      .speed = 4,
-      .fsm = kStart,
-      .update_interval = 1000,
-  };
+  // static TetrisState_t tetris_info = {
+  //     .field = rows,
+  //     .next = next_rows,
+  //     .current = current_rows,
+  //     .score = 1,
+  //     .high_score = 2,
+  //     .level = 3,
+  //     .speed = 4,
+  //     .fsm = kStart,
+  //     .update_interval = 1000,
+  // };
 
-  return &tetris_info;
+  // return &tetris_info;
+  static TetrisState_t* ptr_tetris_info = NULL;
+  if (ptr_tetris_info == NULL) {
+    static TetrisState_t tetris_info = {
+        .field = rows,
+        .next = next_rows,
+        .current = current_rows,
+        .score = 1,
+        .high_score = 2,
+        .level = 3,
+        .speed = 4,
+        .fsm = kStart,
+        .update_interval = 1000,
+    };
+    tetris_info.last_tick = currentTimeMs();
+    ptr_tetris_info = &tetris_info;
+  }
+
+  return ptr_tetris_info;
 }
 
 void clearNext() {
@@ -117,19 +135,6 @@ void generateFigure() {
   refresh();
 }
 
-// void addCurrentInField() {
-//   TetrisState_t* state = getTetrisInfo();
-//   // Переносим фигуру из current на field с учетом координат
-//   for (int i = 0; i < 4; i++) {
-//     for (int j = 0; j < 4; j++) {
-//       // Копирование в current
-//       // if (state->field[i + state->y][j + state->x] == 0) {
-//       if (state->current[i][j]) {
-//         state->field[i + state->y][j + state->x] = state->current[i][j];
-//       }
-//     }
-//   }
-// }
 
 bool isPointOutField(int x, int y) {
   return (x < 0 || x >= 10 || y < 0 || y >= 20);
@@ -153,16 +158,32 @@ void addCurrentInField() {
 GameInfo_t updateCurrentState() {
   // Создание массива state_info;
   GameInfo_t current_state = {0};
-
   TetrisState_t* state = getTetrisInfo();
+
+  mvprintw(22, 1, "fsm = %d (0=Start, 1=Pause, 2=Move)", state->fsm);
+  mvprintw(23, 1, "timeToShift = %d", timeToShift);
+
+  if (state->fsm == kMove) {
+  bool should_shift = timeToShift;
+  }
+
+  if (state->fsm == kMove && timeToShift()) {
+    clearCurrent(); //  Убираем фигуру с поля
+  if (false == moveFigureDown()) {
+      addCurrentInField();
+      generateFigure();
+      clearCurrent();
+    }
+    addCurrentInField();
+  } else {
+  addCurrentInField();
+  }
 
   for (int i = 0; i < 20; i++) {
     for (int j = 0; j < 10; j++) {
-      mvprintw(i + 30, j * 2, "%d", state->field[i][j]);
+      mvprintw(i + 40, j * 2, "%d", state->field[i][j]);
     }
   }
-
-  // addCurrentInField();
 
   current_state.score = state->score;
   current_state.high_score = state->high_score;
@@ -170,22 +191,9 @@ GameInfo_t updateCurrentState() {
   current_state.speed = state->speed;
   current_state.field = state->field;
   current_state.next = state->next;
-  if (state->fsm == kMove && timeToShift()) {
-    if (false == moveFigureDown()) {
-      generateFigure();
-    }
-  }
+  
   return current_state;
 }
-
-// void clearCurrent() {
-//   TetrisState_t* state = getTetrisInfo();
-//   for (int i = 0; i < 4; i++) {
-//     for (int j = 0; j < 4; j++) {
-//       state->field[i + state->y][j + state->x] = 0;
-//     }
-//   }
-// }
 
 void clearCurrent() {
   TetrisState_t* state = getTetrisInfo();
@@ -204,10 +212,6 @@ bool canPlaceAt(const TetrisState_t* state, int nx, int ny) {
     for (int j = 0; j < 4 && ok; ++j) {
       if (state->current[i][j]) {
         int x = nx + j, y = ny + i;
-        // mvprintw(26, 1, "%d", isPointOutField(x, y));
-        // mvprintw(27, 1, "%d", state->field[y][x]);
-        // mvprintw(28, 1, "x = %d  ", x);
-        // mvprintw(29, 1, "y = %d  ", y);
         if (isPointOutField(x, y) || state->field[y][x]) {
           ok = false;  // 1. Переименовать переменную ok
         }
@@ -216,21 +220,6 @@ bool canPlaceAt(const TetrisState_t* state, int nx, int ny) {
   }
   return ok;
 }
-
-// bool canPlaceAt(const TetrisState_t* state, int nx, int ny) {
-//   bool ok = true;
-//   for (int i = 0; i < 4 && ok; ++i) {
-//     for (int j = 0; j < 4 && ok; ++j) {
-//       if (state->current[i][j]) {
-//         int x = nx + j, y = ny + i;
-//         if (isPointOutField(x, y) || state->field[y][x]) {
-//           ok = false;  // 1. Переименовать переменную ol
-//         }
-//       }
-//     }
-//   }
-//   return ok;
-// }
 
 void moveFigureLeft() {
   TetrisState_t* state = getTetrisInfo();
@@ -242,18 +231,6 @@ void moveFigureLeft() {
   addCurrentInField();  // дорисовать обратно
 }
 
-// void moveFigureLeft(){
-//   TetrisState_t* state = getTetrisInfo();
-//   // Стереть текущее положение фигуры на field
-//   clearCurrent();
-//   // изменение координат по x на -1 пиксель
-//   state->x = state->x - 1;
-//   // 2.Проверка можем ли мы находиться в этих координатах
-//   // если да, то addCurrentInField()
-//   // иначе откатываем изменение координат обратно   state->x = state->x + 1;
-//   // и отрисовываем обратно
-// }
-
 void moveFigureRight() {
   TetrisState_t* state = getTetrisInfo();
   clearCurrent();
@@ -264,76 +241,12 @@ void moveFigureRight() {
   addCurrentInField();
 }
 
-// void moveFigureRight(){
-//   TetrisState_t* state = getTetrisInfo();
-//   clearCurrent();
-//   // изменение координат по x на +1 пиксель
-//   state->x = state->x + 1;
-//   // 3.Проверка можем ли мы находиться в этих координатах
-//   // если да, то addCurrentInField()
-//   // иначе откатываем изменение координат обратно   state->x = state->x - 1;
-//   // и отрисовываем обратно
-// }
-
-// void moveFigureDown() {
-//   TetrisState_t* state = getTetrisInfo();
-//   clearCurrent();
-//   int ny = state->y + 1;
-//   if (canPlaceAt(state, state->x, ny)) {
-//     state->y = ny;  // можем опуститься
-//     mvprintw(25, 1, "canPlaceAt 1");
-//   } else {
-//     mvprintw(25, 1, "0");
-//     // сюда позже ставится "залочить" фигуру и сгенерировать следующую
-//     // lockCurrentAndSpawnNext();
-//   }
-//   addCurrentInField();
-// }
-
-// void moveFigureDown() {
-//   TetrisState_t* state = getTetrisInfo();
-//   clearCurrent();
-//   int ny = state->y + 1;
-//   if (canPlaceAt(state, state->x, ny)) {
-//     state->y = ny;  // можем опуститься
-//     mvprintw(25, 1, "canPlaceAt 1");
-//   } else {
-//     mvprintw(25, 1, "0");
-//     // сюда позже ставится "залочить" фигуру и сгенерировать следующую
-//     // lockCurrentAndSpawnNext();
-//   }
-//   addCurrentInField();
-// }
-
-//  void moveFigureDown(){
-//   TetrisState_t* state = getTetrisInfo();
-//   clearCurrent();
-//   // изменение координат по y на +1 пиксель
-//   state->y = state->y + 1;
-//   // 3.Проверка можем ли мы находиться в этих координатах
-//   // если да, то addCurrentInField()
-//   // иначе откатываем изменение координат обратно   state->y = state->y - 1;
-//   // и отрисовываем обратно
-// }
-
-// void moveFigureDown() {
-//   TetrisState_t* state = getTetrisInfo();
-//   clearCurrent();
-//   int ny = state->y + 1;
-//   if (canPlaceAt(state, state->x, ny)) {
-//     state->y = ny;
-//   } else {
-//     // Фигура достигла конца - здесь будет логика "залочить и создать новую"
-//     // lockCurrentAndSpawnNext();
-//   }
-//   addCurrentInField();
-// }
 
 bool moveFigureDown() {
   TetrisState_t* state = getTetrisInfo();
-  clearCurrent();
+  // clearCurrent();
   int ny = state->y + 1;
-  int moved = false;  // !!!! Обратить внимание !!!!
+  bool moved = false;  // !!!! Обратить внимание !!!!
   if (canPlaceAt(state, state->x, ny)) {
     state->y = ny;
     moved = true;
@@ -341,8 +254,8 @@ bool moveFigureDown() {
     // Фигура достигла конца - здесь будет логика "залочить и создать новую"
     // lockCurrentAndSpawnNext();
   }
-  addCurrentInField();
-  mvprintw(25, 1, "isCanMoveDown = %d  ", moved);
+  // addCurrentInField();
+  mvprintw(24, 1, "isCanMoveDownHYI = %d  ", moved);
   return moved;
 }
 
@@ -397,6 +310,10 @@ bool timeToShift() {
   TetrisState_t* game = getTetrisInfo();
   unsigned long now = currentTimeMs();
 
+  mvprintw(28, 1, "now = %lu", now);
+  mvprintw(29, 1, "last_tick = %lu", game->last_tick);
+  mvprintw(30, 1, "dif = %lu", now - game->last_tick);
+
   if (now - game->last_tick >= game->update_interval) {
     game->last_tick = now;
     return true;  // FIXME
@@ -406,7 +323,7 @@ bool timeToShift() {
 
 unsigned long currentTimeMs() {
   struct timespec ts;
-  clock_gettime(1, &ts);
+  clock_gettime(CLOCK_MONOTONIC, &ts);
   return (unsigned long)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 }
 
@@ -416,6 +333,8 @@ void userInput(UserAction_t action, bool hold) {
   }
   // Добавить конечный автомат;
   TetrisState_t* state = getTetrisInfo();
+
+  mvprintw(25, 1, "action = %d, hold = %d", action, hold);
   // switch (action) {
   //   case Start:
   //     generateFigure();
@@ -444,13 +363,21 @@ void userInput(UserAction_t action, bool hold) {
   switch (state->fsm) {
     case kStart:
       if (action == Start) {
+        mvprintw(26, 1, "START pressed!Genereiting..... ");
         generateFigure();
+        addCurrentInField();
         state->fsm = kMove;
+        mvprintw(27, 1, "fsm set to kMove (%d)", state->fsm);
       }
       break;
     case kMove:
       if (action == Down) {
-        moveFigureDown();
+        clearCurrent();
+        if (moveFigureDown() == false) {
+          addCurrentInField();
+          generateFigure();
+        };
+        addCurrentInField();
       } else if (action == Left) {
         moveFigureLeft();
       } else if (action == Right) {
