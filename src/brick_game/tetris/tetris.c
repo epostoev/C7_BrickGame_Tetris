@@ -117,7 +117,6 @@ void generateFigure() {
   if (next_empty) {
     type_figure = rand() % 7;
     get_figure[type_figure](state->next);
-    refresh();
     next_empty = false;
   }
   // Задаем начальные координаты x, y. (для current)
@@ -132,9 +131,7 @@ void generateFigure() {
   clearNext();
   type_figure = rand() % 7;
   get_figure[type_figure](state->next);
-  refresh();
 }
-
 
 bool isPointOutField(int x, int y) {
   return (x < 0 || x >= 10 || y < 0 || y >= 20);
@@ -160,30 +157,49 @@ GameInfo_t updateCurrentState() {
   GameInfo_t current_state = {0};
   TetrisState_t* state = getTetrisInfo();
 
-  mvprintw(22, 1, "fsm = %d (0=Start, 1=Pause, 2=Move)", state->fsm);
+  mvprintw(22, 1, "fsm = %d (0=Start, 1=Pause, 3=Move)", state->fsm);
   mvprintw(23, 1, "timeToShift = %d", timeToShift);
 
   if (state->fsm == kMove) {
-  bool should_shift = timeToShift;
+    // bool should_shift = timeToShift;
   }
 
   if (state->fsm == kMove && timeToShift()) {
-    clearCurrent(); //  Убираем фигуру с поля
-  if (false == moveFigureDown()) {
-      addCurrentInField();
+    // clearCurrent();  //  Убираем фигуру с поля
+    if (false == moveFigureDown()) {
+      // Есть ли заполненные линии
+      for (int i = 0; i < 20; i++) {
+        int cnt = 0;
+        for (int j = 0; j < 10; j++) {
+          if (state->field[i][j]) {
+            cnt++;
+          }
+        }
+        // Есть ли заполненная линия, то
+        mvprintw(31, 1, "cnt_1 = %d  ", cnt);
+        if (cnt == 10) {
+          for (int k = i; k > 0; k--) {
+            for (int j = 0; j < 10; j++) {
+              // Убрать линию, сдвинуть все что выше
+              state->field[k][j] = state->field[k - 1][j];
+            }
+          }
+          memset(state->field[0], 0, 10);
+        }
+      }
+
+      // Начислить очки
+      // Обновить уровень и обновить скорость
+      // Проверка на завершение игры
       generateFigure();
       clearCurrent();
     }
-    addCurrentInField();
-  } else {
-  addCurrentInField();
   }
-
-  for (int i = 0; i < 20; i++) {
-    for (int j = 0; j < 10; j++) {
-      mvprintw(i + 40, j * 2, "%d", state->field[i][j]);
-    }
-  }
+  // for (int i = 0; i < 20; i++) {
+  //   for (int j = 0; j < 10; j++) {
+  //     mvprintw(i + 40, j * 2, "%d", state->field[i][j]);
+  //   }
+  // }
 
   current_state.score = state->score;
   current_state.high_score = state->high_score;
@@ -191,7 +207,7 @@ GameInfo_t updateCurrentState() {
   current_state.speed = state->speed;
   current_state.field = state->field;
   current_state.next = state->next;
-  
+
   return current_state;
 }
 
@@ -241,10 +257,9 @@ void moveFigureRight() {
   addCurrentInField();
 }
 
-
 bool moveFigureDown() {
   TetrisState_t* state = getTetrisInfo();
-  // clearCurrent();
+  clearCurrent();
   int ny = state->y + 1;
   bool moved = false;  // !!!! Обратить внимание !!!!
   if (canPlaceAt(state, state->x, ny)) {
@@ -254,8 +269,8 @@ bool moveFigureDown() {
     // Фигура достигла конца - здесь будет логика "залочить и создать новую"
     // lockCurrentAndSpawnNext();
   }
-  // addCurrentInField();
-  mvprintw(24, 1, "isCanMoveDownHYI = %d  ", moved);
+  addCurrentInField();
+  mvprintw(24, 1, "isCanMoveDown = %d  ", moved);
   return moved;
 }
 
@@ -372,12 +387,12 @@ void userInput(UserAction_t action, bool hold) {
       break;
     case kMove:
       if (action == Down) {
-        clearCurrent();
+        // clearCurrent();
         if (moveFigureDown() == false) {
-          addCurrentInField();
-          generateFigure();
+          // addCurrentInField();
+          // generateFigure();
         };
-        addCurrentInField();
+        // addCurrentInField();
       } else if (action == Left) {
         moveFigureLeft();
       } else if (action == Right) {
