@@ -1,6 +1,7 @@
 #include <ncurses.h>  // УБРАТЬ ПРИ СДАЧЕ
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 #include "../brick_game.h"
 
