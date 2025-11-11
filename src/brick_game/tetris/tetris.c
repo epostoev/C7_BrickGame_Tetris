@@ -152,6 +152,29 @@ void addCurrentInField() {
   }
 }
 
+void checkFullLines() {
+  TetrisState_t* state = getTetrisInfo();
+  for (int i = 0; i < 20; i++) {
+    int cnt = 0;
+    for (int j = 0; j < 10; j++) {
+      if (state->field[i][j]) {
+        cnt++;
+      }
+    }
+    // Есть ли заполненная линия, то
+    mvprintw(31, 1, "cnt_666 = %d  ", cnt);
+    if (cnt == 10) {
+      for (int k = i; k > 0; k--) {
+        for (int j = 0; j < 10; j++) {
+          // Убрать линию, сдвинуть все что выше
+          state->field[k][j] = state->field[k - 1][j];
+        }
+      }
+      memset(state->field[0], 0, 10);
+    }
+  }
+}
+
 GameInfo_t updateCurrentState() {
   // Создание массива state_info;
   GameInfo_t current_state = {0};
@@ -168,25 +191,26 @@ GameInfo_t updateCurrentState() {
     // clearCurrent();  //  Убираем фигуру с поля
     if (false == moveFigureDown()) {
       // Есть ли заполненные линии
-      for (int i = 0; i < 20; i++) {
-        int cnt = 0;
-        for (int j = 0; j < 10; j++) {
-          if (state->field[i][j]) {
-            cnt++;
-          }
-        }
-        // Есть ли заполненная линия, то
-        mvprintw(31, 1, "cnt_1 = %d  ", cnt);
-        if (cnt == 10) {
-          for (int k = i; k > 0; k--) {
-            for (int j = 0; j < 10; j++) {
-              // Убрать линию, сдвинуть все что выше
-              state->field[k][j] = state->field[k - 1][j];
-            }
-          }
-          memset(state->field[0], 0, 10);
-        }
-      }
+      checkFullLines();
+      // for (int i = 0; i < 20; i++) {
+      //   int cnt = 0;
+      //   for (int j = 0; j < 10; j++) {
+      //     if (state->field[i][j]) {
+      //       cnt++;
+      //     }
+      //   }
+      //   // Есть ли заполненная линия, то
+      //   mvprintw(31, 1, "cnt_1 = %d  ", cnt);
+      //   if (cnt == 10) {
+      //     for (int k = i; k > 0; k--) {
+      //       for (int j = 0; j < 10; j++) {
+      //         // Убрать линию, сдвинуть все что выше
+      //         state->field[k][j] = state->field[k - 1][j];
+      //       }
+      //     }
+      //     memset(state->field[0], 0, 10);
+      //   }
+      // }
 
       // Начислить очки
       // Обновить уровень и обновить скорость
