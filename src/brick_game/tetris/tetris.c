@@ -41,15 +41,16 @@ TetrisState_t* getTetrisInfo() {
         .field = rows,
         .next = next_rows,
         .current = current_rows,
-        .score = 1,
+        .score = 0,
         .high_score = 2,
-        .level = 3,
+        .level = 0,
         .speed = 4,
         .fsm = kStart,
         .update_interval = 1000,
     };
     tetris_info.last_tick = currentTimeMs();
     ptr_tetris_info = &tetris_info;
+    srand(time(NULL));
   }
 
   return ptr_tetris_info;
@@ -121,7 +122,7 @@ void generateFigure() {
   }
   // Задаем начальные координаты x, y. (для current)
   state->x = 4;
-  state->y = 0;
+  state->y = -3;
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       // Копирование в current
@@ -133,8 +134,9 @@ void generateFigure() {
   get_figure[type_figure](state->next);
 }
 
-bool isPointOutField(int x, int y) {
-  return (x < 0 || x >= 10 || y < 0 || y >= 20);
+bool isPointOutField(int x, int y) { return (x < 0 || x >= 10 || y >= 20); }
+bool isPointInField(int x, int y) {
+  return (x >= 0 && x < 10 && y >= 0 && y < 20);
 }
 
 void addCurrentInField() {
@@ -144,7 +146,7 @@ void addCurrentInField() {
       if (state->current[i][j]) {
         int x = state->x + j;
         int y = state->y + i;
-        if (isPointOutField(x, y) == false) {
+        if (isPointInField(x, y) == true) {
           state->field[y][x] = state->current[i][j];
         }
       }
@@ -152,9 +154,25 @@ void addCurrentInField() {
   }
 }
 
-void checkFullLines() {
-  int lines_cleared = 0;
+void sumScore() {
   TetrisState_t* state = getTetrisInfo();
+    if (state->lines_cleared == 1) {
+    state->score = state->score + 100;
+  }
+  if (state->lines_cleared == 2) {
+    state->score = state->score + 300;
+  }
+  if (state->lines_cleared == 3) {
+    state->score = state->score + 700;
+  }
+  if (state->lines_cleared == 4) {
+    state->score = state->score + 1500;
+  }
+}
+
+void checkFullLines() {
+  TetrisState_t* state = getTetrisInfo();
+  state->lines_cleared = 0;
   for (int i = 0; i < 20; i++) {
     int cnt = 0;
     for (int j = 0; j < 10; j++) {
@@ -164,18 +182,24 @@ void checkFullLines() {
     }
     // Есть ли заполненная линия, то
     mvprintw(31, 1, "cnt_666 = %d  ", cnt);
-    mvprintw(32, 1, "lines_cleared = %d  ", lines_cleared);
     if (cnt == 10) {
-      lines_cleared ++;
-      mvprintw(33, 1, "lines_cleared = %d  ", lines_cleared);
+      state->lines_cleared++;
       for (int k = i; k > 0; k--) {
         for (int j = 0; j < 10; j++) {
           // Убрать линию, сдвинуть все что выше
           state->field[k][j] = state->field[k - 1][j];
         }
       }
-      memset(state->field[0], 0, 10);
+      memset(state->field[0], 0, sizeof(int) * 10);
     }
+    if (state->lines_cleared > 0) {
+      mvprintw(32, 1, "lines_creared = %d  ", state->lines_cleared);
+    }
+  }
+  // Увеличиваем score в зависимости сколько линий удалилось
+  sumScore();
+  if (state->score % 600 == 0) {
+    state->level ++;
   }
 }
 
@@ -215,6 +239,7 @@ GameInfo_t updateCurrentState() {
   current_state.speed = state->speed;
   current_state.field = state->field;
   current_state.next = state->next;
+  current_state.pause = state->pause;
 
   return current_state;
 }
@@ -224,7 +249,11 @@ void clearCurrent() {
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       if (state->current[i][j]) {
-        state->field[i + state->y][j + state->x] = 0;
+        int x = state->x + j;
+        int y = state->y + i;
+        if (isPointInField(x, y) == true) {
+          state->field[y][x] = 0;
+        }
       }
     }
   }
@@ -236,8 +265,9 @@ bool canPlaceAt(const TetrisState_t* state, int nx, int ny) {
     for (int j = 0; j < 4 && ok; ++j) {
       if (state->current[i][j]) {
         int x = nx + j, y = ny + i;
-        if (isPointOutField(x, y) || state->field[y][x]) {
-          ok = false;  // 1. Переименовать переменную ok
+          if (isPointOutField(x, y) ||
+              isPointInField(x, y) && state->field[y][x]) {
+            ok = false;  // 1. Переименовать переменную ok
         }
       }
     }
@@ -407,8 +437,16 @@ void userInput(UserAction_t action, bool hold) {
         moveFigureRight();
       } else if (action == Action) {
         rotateFigure();
+      } else if (action == Pause) {
+        state->fsm = kPause;
+        state->pause = 1;
       }
       break;
+    case kPause:
+      if (action == Pause) {
+        state->fsm = kMove;
+        state->pause = 0;
+      }
     default:
       break;
   }
