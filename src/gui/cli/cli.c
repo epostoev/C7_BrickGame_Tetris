@@ -87,6 +87,7 @@ bool getAction(UserAction_t *key_action) {
         *key_action = Action;
         break;
       default:
+		return_err = false;
         break;
     }
   }

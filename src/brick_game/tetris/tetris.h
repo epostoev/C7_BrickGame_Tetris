@@ -24,6 +24,10 @@ typedef struct {
   FiniteState_t fsm;
   unsigned long last_tick;
   unsigned long update_interval;
+  int pause;
+
+  // статистика игры
+  int lines_cleared;
 } TetrisState_t;
 
 typedef enum {
