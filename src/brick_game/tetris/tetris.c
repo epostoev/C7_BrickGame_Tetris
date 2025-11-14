@@ -22,19 +22,6 @@ TetrisState_t* getTetrisInfo() {
     current_rows[i] = current[i];
   }
 
-  // static TetrisState_t tetris_info = {
-  //     .field = rows,
-  //     .next = next_rows,
-  //     .current = current_rows,
-  //     .score = 1,
-  //     .high_score = 2,
-  //     .level = 3,
-  //     .speed = 4,
-  //     .fsm = kStart,
-  //     .update_interval = 1000,
-  // };
-
-  // return &tetris_info;
   static TetrisState_t* ptr_tetris_info = NULL;
   if (ptr_tetris_info == NULL) {
     static TetrisState_t tetris_info = {
@@ -156,7 +143,7 @@ void addCurrentInField() {
 
 void sumScore() {
   TetrisState_t* state = getTetrisInfo();
-    if (state->lines_cleared == 1) {
+  if (state->lines_cleared == 1) {
     state->score = state->score + 100;
   }
   if (state->lines_cleared == 2) {
@@ -199,7 +186,7 @@ void checkFullLines() {
   // Увеличиваем score в зависимости сколько линий удалилось
   sumScore();
   if (state->score % 600 == 0) {
-    state->level ++;
+    state->level++;
   }
 }
 
@@ -212,11 +199,9 @@ GameInfo_t updateCurrentState() {
   mvprintw(23, 1, "timeToShift = %d", timeToShift);
 
   if (state->fsm == kMove) {
-    // bool should_shift = timeToShift;
   }
 
   if (state->fsm == kMove && timeToShift()) {
-    // clearCurrent();  //  Убираем фигуру с поля
     if (false == moveFigureDown()) {
       // Есть ли заполненные линии
       checkFullLines();
@@ -227,11 +212,6 @@ GameInfo_t updateCurrentState() {
       clearCurrent();
     }
   }
-  // for (int i = 0; i < 20; i++) {
-  //   for (int j = 0; j < 10; j++) {
-  //     mvprintw(i + 40, j * 2, "%d", state->field[i][j]);
-  //   }
-  // }
 
   current_state.score = state->score;
   current_state.high_score = state->high_score;
@@ -265,9 +245,9 @@ bool canPlaceAt(const TetrisState_t* state, int nx, int ny) {
     for (int j = 0; j < 4 && ok; ++j) {
       if (state->current[i][j]) {
         int x = nx + j, y = ny + i;
-          if (isPointOutField(x, y) ||
-              isPointInField(x, y) && state->field[y][x]) {
-            ok = false;  // 1. Переименовать переменную ok
+        if (isPointOutField(x, y) ||
+            isPointInField(x, y) && state->field[y][x]) {
+          ok = false;  // 1. Переименовать переменную ok
         }
       }
     }
@@ -386,51 +366,18 @@ void userInput(UserAction_t action, bool hold) {
   }
   // Добавить конечный автомат;
   TetrisState_t* state = getTetrisInfo();
-
-  mvprintw(25, 1, "action = %d, hold = %d", action, hold);
-  // switch (action) {
-  //   case Start:
-  //     generateFigure();
-  //     break;
-  //   case Up:
-  //     state->level += 1;
-  //     break;
-  //   case Down:
-  //     if (false == moveFigureDown()) {
-  //       generateFigure();
-  //     }
-  //     break;
-  //   case Left:
-  //     moveFigureLeft();
-  //     break;
-  //   case Right:
-  //     moveFigureRight();
-  //     break;
-  //   case Action:
-  //     rotateFigure();
-  //     // Перенос на поле field и генерация следующей фигру в поле next
-  //     break;
-  //   default:
-  //     break;
-  // }
   switch (state->fsm) {
     case kStart:
       if (action == Start) {
-        mvprintw(26, 1, "START pressed!Genereiting..... ");
         generateFigure();
         addCurrentInField();
         state->fsm = kMove;
-        mvprintw(27, 1, "fsm set to kMove (%d)", state->fsm);
       }
       break;
     case kMove:
       if (action == Down) {
-        // clearCurrent();
         if (moveFigureDown() == false) {
-          // addCurrentInField();
-          // generateFigure();
         };
-        // addCurrentInField();
       } else if (action == Left) {
         moveFigureLeft();
       } else if (action == Right) {
