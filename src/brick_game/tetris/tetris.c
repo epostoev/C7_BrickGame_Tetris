@@ -376,8 +376,9 @@ void userInput(UserAction_t action, bool hold) {
       break;
     case kMove:
       if (action == Down) {
-        if (moveFigureDown() == false) {
-        };
+        while (moveFigureDown()){};
+        // if (moveFigureDown() == false) {
+        // };
       } else if (action == Left) {
         moveFigureLeft();
       } else if (action == Right) {
