@@ -5,6 +5,11 @@
 
 #include "../brick_game.h"
 
+typedef struct {
+  int cnt1;
+  int cnt2;
+} My_Counter;
+
 typedef enum {
   kStart,
   kPause,

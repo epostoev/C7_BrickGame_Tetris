@@ -14,8 +14,11 @@ void gameLoop() {
   GameInfo_t state_info;
   bool run_game = true;
   bool hold;
+  int cnt = 0;
   while (run_game) {
     hold = getAction(&key_action);	// <--
+    mvprintw(25, 28, "| hold = %d", hold);
+    mvprintw(26, 28, "| cnt = %d", cnt++);
     userInput(key_action, hold);	// -->	
     state_info = updateCurrentState();	// <--
     drawStateInfo(state_info);			// -->
@@ -56,7 +59,6 @@ void drawStateInfo(GameInfo_t state_info) {
 
 bool getAction(UserAction_t *key_action) {
   int signal = getch();
-  mvprintw(21, 1, "code=%d hex=%#x", signal, signal);
   bool return_err = false;
   if (signal != ERR) {
     return_err = true;

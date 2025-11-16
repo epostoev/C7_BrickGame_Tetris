@@ -193,14 +193,12 @@ void checkFullLines() {
 GameInfo_t updateCurrentState() {
   // Создание массива state_info;
   GameInfo_t current_state = {0};
+  static My_Counter current = {0};
   TetrisState_t* state = getTetrisInfo();
-
-  mvprintw(22, 1, "fsm = %d (0=Start, 1=Pause, 3=Move)", state->fsm);
+  mvprintw(22, 1, "fsm = %d (0=Start, 1=Pause, 2=Move)", state->fsm);
   mvprintw(23, 1, "timeToShift = %d", timeToShift);
-
   if (state->fsm == kMove) {
   }
-
   if (state->fsm == kMove && timeToShift()) {
     if (false == moveFigureDown()) {
       // Есть ли заполненные линии
@@ -212,7 +210,7 @@ GameInfo_t updateCurrentState() {
       clearCurrent();
     }
   }
-
+  mvprintw(29, 28, "| cnt_1 = %d", current.cnt1 ++);
   current_state.score = state->score;
   current_state.high_score = state->high_score;
   current_state.level = state->level;
@@ -366,6 +364,7 @@ void userInput(UserAction_t action, bool hold) {
   }
   // Добавить конечный автомат;
   TetrisState_t* state = getTetrisInfo();
+  mvprintw(27, 28, "| 27:state->fsm = %d  ", state->fsm);
   switch (state->fsm) {
     case kStart:
       if (action == Start) {
@@ -388,6 +387,7 @@ void userInput(UserAction_t action, bool hold) {
       } else if (action == Pause) {
         state->fsm = kPause;
         state->pause = 1;
+        mvprintw(28, 28, "| state->fsm = %d  ", state->fsm);
       }
       break;
     case kPause:
