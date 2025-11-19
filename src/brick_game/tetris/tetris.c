@@ -5,7 +5,7 @@ TetrisState_t* getTetrisInfo() {
   static int field[20][10] = {0};
   static int* rows[20];
   for (int i = 0; i < 20; i++) {
-    rows[i] = field[i];
+    rows[i] = field[i];  // назначаем указатели на ряды массива field
   }
 
   // Создание массива next;
@@ -29,9 +29,9 @@ TetrisState_t* getTetrisInfo() {
         .next = next_rows,
         .current = current_rows,
         .score = 0,
-        .high_score = 2,
+        .high_score = 0,
         .level = 0,
-        .speed = 4,
+        .speed = 0,
         .fsm = kStart,
         .update_interval = 1000,
     };
@@ -185,8 +185,11 @@ void checkFullLines() {
   }
   // Увеличиваем score в зависимости сколько линий удалилось
   sumScore();
-  if (state->score % 600 == 0) {
+  if (state->score % 600 == 0 && state->lines_cleared > 0 &&
+      state->level < 10) {
     state->level++;
+    state->speed++;
+    state->update_interval = state->update_interval - 100;
   }
 }
 
@@ -197,20 +200,23 @@ GameInfo_t updateCurrentState() {
   TetrisState_t* state = getTetrisInfo();
   mvprintw(22, 1, "fsm = %d (0=Start, 1=Pause, 2=Move)", state->fsm);
   mvprintw(23, 1, "timeToShift = %d", timeToShift);
-  if (state->fsm == kMove) {
-  }
-  if (state->fsm == kMove && timeToShift()) {
-    if (false == moveFigureDown()) {
-      // Есть ли заполненные линии
-      checkFullLines();
-      // Начислить очки
-      // Обновить уровень и обновить скорость
-      // Проверка на завершение игры
-      generateFigure();
-      clearCurrent();
+  if (state->field != NULL) {  // Вызов Terminate
+    if (state->fsm == kMove && timeToShift()) {
+      if (false == moveFigureDown()) {
+        // Есть ли заполненные линии
+        checkFullLines();
+        // Начислить очки
+        // Обновить уровень и обновить скорость
+        // Проверка на завершение игры
+        // Если заполнен нулевой ряд,
+        // то GameOver (!!!!!) <----------------------------
+
+        generateFigure();
+        clearCurrent();
+      }
     }
   }
-  mvprintw(29, 28, "| cnt_1 = %d", current.cnt1 ++);
+  mvprintw(29, 28, "| cnt_1 = %d", current.cnt1++);
   current_state.score = state->score;
   current_state.high_score = state->high_score;
   current_state.level = state->level;
@@ -347,7 +353,7 @@ bool timeToShift() {
 
   if (now - game->last_tick >= game->update_interval) {
     game->last_tick = now;
-    return true;  // FIXME
+    return true;  // TODO: FIXME
   }
   return false;
 }
@@ -375,7 +381,8 @@ void userInput(UserAction_t action, bool hold) {
       break;
     case kMove:
       if (action == Down) {
-        while (moveFigureDown()){};
+        while (moveFigureDown()) {
+        };
         // if (moveFigureDown() == false) {
         // };
       } else if (action == Left) {
@@ -388,6 +395,8 @@ void userInput(UserAction_t action, bool hold) {
         state->fsm = kPause;
         state->pause = 1;
         mvprintw(28, 28, "| state->fsm = %d  ", state->fsm);
+      } else if (action == Terminate) {
+        state->field = NULL;
       }
       break;
     case kPause:
@@ -395,6 +404,15 @@ void userInput(UserAction_t action, bool hold) {
         state->fsm = kMove;
         state->pause = 0;
       }
+      break;
+    case kGameOver:
+      if (action == Terminate) {
+        // Выход из игры
+      } else if (action == Start) {
+        // начинаем заново
+      }
+      mvprintw(28, 28, "| state->fsm = %d  ", state->fsm);
+
     default:
       break;
   }

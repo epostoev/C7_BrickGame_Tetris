@@ -16,12 +16,16 @@ void gameLoop() {
   bool hold;
   int cnt = 0;
   while (run_game) {
-    hold = getAction(&key_action);	// <--
+    hold = getAction(&key_action);  // <--
     mvprintw(25, 28, "| hold = %d", hold);
     mvprintw(26, 28, "| cnt = %d", cnt++);
-    userInput(key_action, hold);	// -->	
-    state_info = updateCurrentState();	// <--
-    drawStateInfo(state_info);			// -->
+    userInput(key_action, hold);        // -->
+    state_info = updateCurrentState();  // <--
+    if (state_info.field == NULL) {
+      run_game = false;
+    } else {
+      drawStateInfo(state_info);  // -->
+    }
   }
 }
 
@@ -74,32 +78,32 @@ bool getAction(UserAction_t *key_action) {
         mvprintw(25, 1, "      ");
         mvprintw(25, 1, "Pause");
         break;
-		case KEY_Q_LOWER:
+      case KEY_Q_LOWER:
         *key_action = Terminate;
         break;
-		case KEY_LEFT:
+      case KEY_LEFT:
         *key_action = Left;
         mvprintw(25, 1, "      ");
         mvprintw(25, 1, "Left");
-        mvprintw(26, 1, "key_action = %p", (void*)key_action);
+        mvprintw(26, 1, "key_action = %p", (void *)key_action);
         mvprintw(27, 1, "key_action_number = %d", *key_action);
         break;
-		case KEY_RIGHT:
+      case KEY_RIGHT:
         *key_action = Right;
         mvprintw(25, 1, "      ");
         mvprintw(25, 1, "Right");
-        mvprintw(26, 1, "key_action = %p", (void*)key_action);
+        mvprintw(26, 1, "key_action = %p", (void *)key_action);
         mvprintw(27, 1, "key_action_number = %d", *key_action);
         break;
-		case KEY_UP:
+      case KEY_UP:
         *key_action = Up;
         break;
-		case KEY_DOWN:
+      case KEY_DOWN:
         *key_action = Down;
         mvprintw(25, 1, "      ");
         mvprintw(25, 1, "Down");
         break;
-		case KEY_SPACE:
+      case KEY_SPACE:
         *key_action = Action;
         mvprintw(25, 1, "      ");
         mvprintw(25, 1, "Action");

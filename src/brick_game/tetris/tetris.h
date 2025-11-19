@@ -14,6 +14,7 @@ typedef enum {
   kStart,
   kPause,
   kMove,
+  kGameOver,
 } FiniteState_t;
 
 typedef struct {
