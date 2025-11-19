@@ -23,3 +23,5 @@ typedef struct {
 void userInput(UserAction_t action, bool hold);
 
 GameInfo_t updateCurrentState();
+
+// TODO: Добавить защиту define guard

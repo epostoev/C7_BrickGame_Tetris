@@ -5,7 +5,7 @@ TetrisState_t* getTetrisInfo() {
   static int field[20][10] = {0};
   static int* rows[20];
   for (int i = 0; i < 20; i++) {
-    rows[i] = field[i];
+    rows[i] = field[i];  // назначаем указатели на ряды массива field
   }
 
   // Создание массива next;
@@ -22,19 +22,6 @@ TetrisState_t* getTetrisInfo() {
     current_rows[i] = current[i];
   }
 
-  // static TetrisState_t tetris_info = {
-  //     .field = rows,
-  //     .next = next_rows,
-  //     .current = current_rows,
-  //     .score = 1,
-  //     .high_score = 2,
-  //     .level = 3,
-  //     .speed = 4,
-  //     .fsm = kStart,
-  //     .update_interval = 1000,
-  // };
-
-  // return &tetris_info;
   static TetrisState_t* ptr_tetris_info = NULL;
   if (ptr_tetris_info == NULL) {
     static TetrisState_t tetris_info = {
@@ -42,9 +29,9 @@ TetrisState_t* getTetrisInfo() {
         .next = next_rows,
         .current = current_rows,
         .score = 0,
-        .high_score = 2,
+        .high_score = 0,
         .level = 0,
-        .speed = 4,
+        .speed = 0,
         .fsm = kStart,
         .update_interval = 1000,
     };
@@ -156,7 +143,7 @@ void addCurrentInField() {
 
 void sumScore() {
   TetrisState_t* state = getTetrisInfo();
-    if (state->lines_cleared == 1) {
+  if (state->lines_cleared == 1) {
     state->score = state->score + 100;
   }
   if (state->lines_cleared == 2) {
@@ -198,41 +185,38 @@ void checkFullLines() {
   }
   // Увеличиваем score в зависимости сколько линий удалилось
   sumScore();
-  if (state->score % 600 == 0) {
-    state->level ++;
+  if (state->score % 600 == 0 && state->lines_cleared > 0 &&
+      state->level < 10) {
+    state->level++;
+    state->speed++;
+    state->update_interval = state->update_interval - 100;
   }
 }
 
 GameInfo_t updateCurrentState() {
   // Создание массива state_info;
   GameInfo_t current_state = {0};
+  static My_Counter current = {0};
   TetrisState_t* state = getTetrisInfo();
-
-  mvprintw(22, 1, "fsm = %d (0=Start, 1=Pause, 3=Move)", state->fsm);
+  mvprintw(22, 1, "fsm = %d (0=Start, 1=Pause, 2=Move)", state->fsm);
   mvprintw(23, 1, "timeToShift = %d", timeToShift);
+  if (state->field != NULL) {  // Вызов Terminate
+    if (state->fsm == kMove && timeToShift()) {
+      if (false == moveFigureDown()) {
+        // Есть ли заполненные линии
+        checkFullLines();
+        // Начислить очки
+        // Обновить уровень и обновить скорость
+        // Проверка на завершение игры
+        // Если заполнен нулевой ряд,
+        // то GameOver (!!!!!) <----------------------------
 
-  if (state->fsm == kMove) {
-    // bool should_shift = timeToShift;
-  }
-
-  if (state->fsm == kMove && timeToShift()) {
-    // clearCurrent();  //  Убираем фигуру с поля
-    if (false == moveFigureDown()) {
-      // Есть ли заполненные линии
-      checkFullLines();
-      // Начислить очки
-      // Обновить уровень и обновить скорость
-      // Проверка на завершение игры
-      generateFigure();
-      clearCurrent();
+        generateFigure();
+        clearCurrent();
+      }
     }
   }
-  // for (int i = 0; i < 20; i++) {
-  //   for (int j = 0; j < 10; j++) {
-  //     mvprintw(i + 40, j * 2, "%d", state->field[i][j]);
-  //   }
-  // }
-
+  mvprintw(29, 28, "| cnt_1 = %d", current.cnt1++);
   current_state.score = state->score;
   current_state.high_score = state->high_score;
   current_state.level = state->level;
@@ -265,9 +249,9 @@ bool canPlaceAt(const TetrisState_t* state, int nx, int ny) {
     for (int j = 0; j < 4 && ok; ++j) {
       if (state->current[i][j]) {
         int x = nx + j, y = ny + i;
-          if (isPointOutField(x, y) ||
-              isPointInField(x, y) && state->field[y][x]) {
-            ok = false;  // 1. Переименовать переменную ok
+        if (isPointOutField(x, y) ||
+            isPointInField(x, y) && state->field[y][x]) {
+          ok = false;  // 1. Переименовать переменную ok
         }
       }
     }
@@ -369,7 +353,7 @@ bool timeToShift() {
 
   if (now - game->last_tick >= game->update_interval) {
     game->last_tick = now;
-    return true;  // FIXME
+    return true;  // TODO: FIXME
   }
   return false;
 }
@@ -386,51 +370,21 @@ void userInput(UserAction_t action, bool hold) {
   }
   // Добавить конечный автомат;
   TetrisState_t* state = getTetrisInfo();
-
-  mvprintw(25, 1, "action = %d, hold = %d", action, hold);
-  // switch (action) {
-  //   case Start:
-  //     generateFigure();
-  //     break;
-  //   case Up:
-  //     state->level += 1;
-  //     break;
-  //   case Down:
-  //     if (false == moveFigureDown()) {
-  //       generateFigure();
-  //     }
-  //     break;
-  //   case Left:
-  //     moveFigureLeft();
-  //     break;
-  //   case Right:
-  //     moveFigureRight();
-  //     break;
-  //   case Action:
-  //     rotateFigure();
-  //     // Перенос на поле field и генерация следующей фигру в поле next
-  //     break;
-  //   default:
-  //     break;
-  // }
+  mvprintw(27, 28, "| 27:state->fsm = %d  ", state->fsm);
   switch (state->fsm) {
     case kStart:
       if (action == Start) {
-        mvprintw(26, 1, "START pressed!Genereiting..... ");
         generateFigure();
         addCurrentInField();
         state->fsm = kMove;
-        mvprintw(27, 1, "fsm set to kMove (%d)", state->fsm);
       }
       break;
     case kMove:
       if (action == Down) {
-        // clearCurrent();
-        if (moveFigureDown() == false) {
-          // addCurrentInField();
-          // generateFigure();
+        while (moveFigureDown()) {
         };
-        // addCurrentInField();
+        // if (moveFigureDown() == false) {
+        // };
       } else if (action == Left) {
         moveFigureLeft();
       } else if (action == Right) {
@@ -440,6 +394,9 @@ void userInput(UserAction_t action, bool hold) {
       } else if (action == Pause) {
         state->fsm = kPause;
         state->pause = 1;
+        mvprintw(28, 28, "| state->fsm = %d  ", state->fsm);
+      } else if (action == Terminate) {
+        state->field = NULL;
       }
       break;
     case kPause:
@@ -447,6 +404,15 @@ void userInput(UserAction_t action, bool hold) {
         state->fsm = kMove;
         state->pause = 0;
       }
+      break;
+    case kGameOver:
+      if (action == Terminate) {
+        // Выход из игры
+      } else if (action == Start) {
+        // начинаем заново
+      }
+      mvprintw(28, 28, "| state->fsm = %d  ", state->fsm);
+
     default:
       break;
   }

@@ -14,11 +14,18 @@ void gameLoop() {
   GameInfo_t state_info;
   bool run_game = true;
   bool hold;
+  int cnt = 0;
   while (run_game) {
-    hold = getAction(&key_action);
-    userInput(key_action, hold);
-    state_info = updateCurrentState();
-    drawStateInfo(state_info);
+    hold = getAction(&key_action);  // <--
+    mvprintw(25, 28, "| hold = %d", hold);
+    mvprintw(26, 28, "| cnt = %d", cnt++);
+    userInput(key_action, hold);        // -->
+    state_info = updateCurrentState();  // <--
+    if (state_info.field == NULL) {
+      run_game = false;
+    } else {
+      drawStateInfo(state_info);  // -->
+    }
   }
 }
 
@@ -56,7 +63,6 @@ void drawStateInfo(GameInfo_t state_info) {
 
 bool getAction(UserAction_t *key_action) {
   int signal = getch();
-  mvprintw(21, 1, "code=%d hex=%#x", signal, signal);
   bool return_err = false;
   if (signal != ERR) {
     return_err = true;
@@ -64,30 +70,46 @@ bool getAction(UserAction_t *key_action) {
       case 10:
       case 13:
         *key_action = Start;
+        mvprintw(25, 1, "      ");
+        mvprintw(25, 1, "Start");
         break;
       case KEY_P_LOWER:
         *key_action = Pause;
+        mvprintw(25, 1, "      ");
+        mvprintw(25, 1, "Pause");
         break;
       case KEY_Q_LOWER:
         *key_action = Terminate;
         break;
       case KEY_LEFT:
         *key_action = Left;
+        mvprintw(25, 1, "      ");
+        mvprintw(25, 1, "Left");
+        mvprintw(26, 1, "key_action = %p", (void *)key_action);
+        mvprintw(27, 1, "key_action_number = %d", *key_action);
         break;
       case KEY_RIGHT:
         *key_action = Right;
+        mvprintw(25, 1, "      ");
+        mvprintw(25, 1, "Right");
+        mvprintw(26, 1, "key_action = %p", (void *)key_action);
+        mvprintw(27, 1, "key_action_number = %d", *key_action);
         break;
       case KEY_UP:
         *key_action = Up;
         break;
       case KEY_DOWN:
         *key_action = Down;
+        mvprintw(25, 1, "      ");
+        mvprintw(25, 1, "Down");
         break;
       case KEY_SPACE:
         *key_action = Action;
+        mvprintw(25, 1, "      ");
+        mvprintw(25, 1, "Action");
         break;
       default:
-		return_err = false;
+        return_err = false;
         break;
     }
   }
