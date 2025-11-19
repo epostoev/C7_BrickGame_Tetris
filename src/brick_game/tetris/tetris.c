@@ -184,9 +184,18 @@ void checkFullLines() {
     }
   }
   // Увеличиваем score в зависимости сколько линий удалилось
+  int old_score = state->score;
+  mvprintw(30, 28, "| old_score = %d", state->score);
   sumScore();
-  if (state->score % 600 == 0 && state->lines_cleared > 0 &&
-      state->level < 10) {
+  int new_score = state->score;
+  mvprintw(31, 28, "| new_score = %d", state->score);
+  int old_lvl = old_score / 600; 
+  int new_lvl = new_score / 600; 
+  mvprintw(32, 28, "| old_lvl = %d", old_lvl);
+  mvprintw(33, 28, "| new_lvl = %d", new_lvl);
+  if (new_lvl > old_lvl && state->lines_cleared > 0 &&
+    state->level <= 10) {
+    mvprintw(34, 28, "| calculate ");
     state->level++;
     state->speed++;
     state->update_interval = state->update_interval - 100;
@@ -417,6 +426,3 @@ void userInput(UserAction_t action, bool hold) {
       break;
   }
 }
-
-// Создать next на front[4][4] and back
-// Создать фигуры
