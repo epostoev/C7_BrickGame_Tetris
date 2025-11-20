@@ -187,6 +187,22 @@ void checkFullLines() {
   int old_score = state->score;
   mvprintw(30, 28, "| old_score = %d", state->score);
   sumScore();
+
+  // Проверка на запись в поле high_score
+  if (state->score > state->high_score) {
+    FILE* fileHighScore = fopen("Record.txt", "r");
+      if (fileHighScore == NULL) {
+        return;
+      } else {
+        fscanf(fileHighScore, "%d", &state->high_score);
+        fclose(fileHighScore);
+      }
+    state->high_score = state->score;
+    fileHighScore = fopen("Record.txt", "w");
+    fprintf(fileHighScore, "%d", state->high_score);
+    fclose(fileHighScore);
+  }
+
   int new_score = state->score;
   mvprintw(31, 28, "| new_score = %d", state->score);
   int old_lvl = old_score / 600; 
@@ -201,6 +217,8 @@ void checkFullLines() {
     state->update_interval = state->update_interval - 100;
   }
 }
+
+
 
 GameInfo_t updateCurrentState() {
   // Создание массива state_info;
