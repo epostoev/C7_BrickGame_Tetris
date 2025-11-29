@@ -47,6 +47,9 @@ typedef enum {
   count_figure,
 } TypeFigure_t;
 
+GameInfo_t getGameInfo();
+
+
 unsigned long currentTimeMs();
 bool timeToShift();
 bool moveFigureDown();
