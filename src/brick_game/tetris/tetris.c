@@ -406,6 +406,19 @@ unsigned long currentTimeMs() {
   return (unsigned long)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 }
 
+
+// Функция очистки поля
+void clearField(){
+  TetrisState_t* state = getTetrisInfo();
+
+  // Очитска поля 20х10
+  for (int i = 0; i < 20; i++){
+    for(int j = 0; j < 10; j++){
+      state->field[i][j] = 0;
+    }
+  }
+}
+
 void userInput(UserAction_t action, bool hold) {
   if (hold == false) {
     return;
@@ -415,7 +428,7 @@ void userInput(UserAction_t action, bool hold) {
   mvprintw(27, 28, "| 27:state->fsm = %d  ", state->fsm);
   switch (state->fsm) {
     case kStart:
-    case kGameOver:
+    // case kGameOver:
       if (action == Start) {
         // Дописать функции очистки поля;
         // Дописать функции очистки статистики;
@@ -464,6 +477,7 @@ void userInput(UserAction_t action, bool hold) {
       } else if (action == Start) {
         // начинаем заново
         // очищается поле field
+        clearField();
         // очищаеюся статистика
         // генерируются фигуры
         // state.fsm = kMove
