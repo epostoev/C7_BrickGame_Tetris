@@ -406,17 +406,29 @@ unsigned long currentTimeMs() {
   return (unsigned long)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 }
 
-
 // Функция очистки поля
-void clearField(){
+void clearField() {
   TetrisState_t* state = getTetrisInfo();
 
   // Очитска поля 20х10
-  for (int i = 0; i < 20; i++){
-    for(int j = 0; j < 10; j++){
+  for (int i = 0; i < 20; i++) {
+    for (int j = 0; j < 10; j++) {
       state->field[i][j] = 0;
     }
   }
+}
+
+void restartGameStats() {
+  TetrisState_t* state = getTetrisInfo();
+  state->score = 0;
+  state->level = 0;
+  state->speed = 0;
+  state->speed = 0;
+  state->lines_cleared = 0;
+  state->lines_cleared = 1000;
+  state->x = 0;
+  state->y = 0;
+  state->last_tick = currentTimeMs();
 }
 
 void userInput(UserAction_t action, bool hold) {
@@ -428,7 +440,7 @@ void userInput(UserAction_t action, bool hold) {
   mvprintw(27, 28, "| 27:state->fsm = %d  ", state->fsm);
   switch (state->fsm) {
     case kStart:
-    // case kGameOver:
+      // case kGameOver:
       if (action == Start) {
         // Дописать функции очистки поля;
         // Дописать функции очистки статистики;
@@ -479,9 +491,15 @@ void userInput(UserAction_t action, bool hold) {
         // очищается поле field
         clearField();
         // очищаеюся статистика
+        state->score = 0;
+        state->level = 0;
+        state->speed = 0;
+        state->speed = 0;
         // генерируются фигуры
         // state.fsm = kMove
+        state->fsm = kMove;
       }
+      break;
       mvprintw(28, 28, "| state->fsm = %d  ", state->fsm);
 
     default:
