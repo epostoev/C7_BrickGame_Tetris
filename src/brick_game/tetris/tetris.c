@@ -50,6 +50,7 @@ TetrisState_t* getTetrisInfo() {
   return ptr_tetris_info;
 }
 
+// 3. Функция очистки массива next
 void clearNext() {
   TetrisState_t* state = getTetrisInfo();
   for (int i = 0; i < 4; i++) {
@@ -406,7 +407,7 @@ unsigned long currentTimeMs() {
   return (unsigned long)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 }
 
-// Функция очистки поля
+// 1. Функция очистки поля
 void clearField() {
   TetrisState_t* state = getTetrisInfo();
 
@@ -418,17 +419,46 @@ void clearField() {
   }
 }
 
+// 2. Функция сброса статистики
 void restartGameStats() {
   TetrisState_t* state = getTetrisInfo();
   state->score = 0;
   state->level = 0;
   state->speed = 0;
-  state->speed = 0;
   state->lines_cleared = 0;
-  state->lines_cleared = 1000;
-  state->x = 0;
-  state->y = 0;
+  state->update_interval = 1000;
+  state->x = 4;
+  state->y = -4;
   state->last_tick = currentTimeMs();
+}
+
+
+// 4. Функция очистки массива current
+// void clearCurrentForRestart() {
+//   TetrisState_t* state = getTetrisInfo();
+//   for (int i = 0; i < 4; i++) {
+//     for (int j = 0; j < 4; j++) {
+//       state->current[i][j] = 0;
+//     }
+//   }
+// }
+
+void restartGame() {
+  TetrisState_t* state = getTetrisInfo();
+
+  // 1. Очищаем поле
+  clearField();
+  // 2. Сбрасываем статистику
+restartGameStats();
+  // 3. Очищаем поле next
+  clearNext();
+  // 4. Очищаем массив current
+  // clearCurrentForRestart();
+  clearCurrent();
+
+  generateFigure();
+  addCurrentInField();
+  state->fsm = kMove;
 }
 
 void userInput(UserAction_t action, bool hold) {
@@ -442,14 +472,10 @@ void userInput(UserAction_t action, bool hold) {
     case kStart:
       // case kGameOver:
       if (action == Start) {
-        // Дописать функции очистки поля;
-        // Дописать функции очистки статистики;
-        // Удалять состояние сосотояние case kGameOver
-        // Подумать нужен ли мне kGameOver в принципе (чем он отличается от
-        // kStart)
-        generateFigure();
-        addCurrentInField();
-        state->fsm = kMove;
+        restartGame();
+        // generateFigure();
+        // addCurrentInField();
+        // state->fsm = kMove;
       } else if (action == Terminate) {
         state->field = NULL;
       }
@@ -491,10 +517,7 @@ void userInput(UserAction_t action, bool hold) {
         // очищается поле field
         clearField();
         // очищаеюся статистика
-        state->score = 0;
-        state->level = 0;
-        state->speed = 0;
-        state->speed = 0;
+        restartGameStats();
         // генерируются фигуры
         // state.fsm = kMove
         state->fsm = kMove;
