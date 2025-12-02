@@ -49,7 +49,6 @@ typedef enum {
 
 GameInfo_t getGameInfo();
 
-
 unsigned long currentTimeMs();
 bool timeToShift();
 bool moveFigureDown();
