@@ -40,6 +40,10 @@ TetrisState_t* getTetrisInfo() {
     if (fileHighScore != NULL) {
       fscanf(fileHighScore, "%d", &tetris_info.high_score);
       fclose(fileHighScore);
+    } else {
+      fileHighScore = fopen("Record.txt", "w");
+      fprintf(fileHighScore, "%d", &tetris_info.high_score);
+      fclose(fileHighScore);
     }
 
     tetris_info.last_tick = currentTimeMs();
@@ -197,19 +201,30 @@ void checkFullLines() {
   sumScore();
 
   // Проверка на запись в поле high_score
-  if (state->score > state->high_score) {
-    FILE* fileHighScore = fopen("Record.txt", "r");
-    if (fileHighScore == NULL) {
-      return;
-    } else {
-      fscanf(fileHighScore, "%d", &state->high_score);
+    if (state->score > state->high_score) {
+      state->high_score = state->score;
+
+    FILE* fileHighScore = fopen("Record.txt", "w");
+      if (fileHighScore != NULL) {
+      // fscanf(fileHighScore, "%d", state->high_score);
+      fprintf(fileHighScore, "%d", state->high_score);
       fclose(fileHighScore);
-    }
-    state->high_score = state->score;
-    fileHighScore = fopen("Record.txt", "w");
-    fprintf(fileHighScore, "%d", state->high_score);
-    fclose(fileHighScore);
+      mvprintw(35, 1, "NewREcordSaved %d: ", state->high_score);
+    } 
   }
+  // if (state->score > state->high_score) {
+  //   FILE* fileHighScore = fopen("Record.txt", "r");
+  //   if (fileHighScore == NULL) {
+  //     return;
+  //   } else {
+  //     fscanf(fileHighScore, "%d", &state->high_score);
+  //     fclose(fileHighScore);
+  //   }
+  //   state->high_score = state->score;
+  //   fileHighScore = fopen("Record.txt", "w");
+  //   fprintf(fileHighScore, "%d", state->high_score);
+  //   fclose(fileHighScore);
+  // }
 
   int new_score = state->score;
   mvprintw(31, 28, "| new_score = %d", state->score);
@@ -270,7 +285,7 @@ GameInfo_t getGameInfo() {
   current_state.pause = state->pause;
   return current_state;
 }
-
+// 4. Функция очистки массива сгккуте
 void clearCurrent() {
   TetrisState_t* state = getTetrisInfo();
   for (int i = 0; i < 4; i++) {
@@ -432,28 +447,16 @@ void restartGameStats() {
   state->last_tick = currentTimeMs();
 }
 
-
-// 4. Функция очистки массива current
-// void clearCurrentForRestart() {
-//   TetrisState_t* state = getTetrisInfo();
-//   for (int i = 0; i < 4; i++) {
-//     for (int j = 0; j < 4; j++) {
-//       state->current[i][j] = 0;
-//     }
-//   }
-// }
-
 void restartGame() {
   TetrisState_t* state = getTetrisInfo();
 
   // 1. Очищаем поле
   clearField();
   // 2. Сбрасываем статистику
-restartGameStats();
+  restartGameStats();
   // 3. Очищаем поле next
   clearNext();
   // 4. Очищаем массив current
-  // clearCurrentForRestart();
   clearCurrent();
 
   generateFigure();
@@ -470,12 +473,9 @@ void userInput(UserAction_t action, bool hold) {
   mvprintw(27, 28, "| 27:state->fsm = %d  ", state->fsm);
   switch (state->fsm) {
     case kStart:
-      // case kGameOver:
+    case kGameOver:
       if (action == Start) {
         restartGame();
-        // generateFigure();
-        // addCurrentInField();
-        // state->fsm = kMove;
       } else if (action == Terminate) {
         state->field = NULL;
       }
@@ -484,8 +484,6 @@ void userInput(UserAction_t action, bool hold) {
       if (action == Down) {
         while (moveFigureDown()) {
         };
-        // if (moveFigureDown() == false) {
-        // };
       } else if (action == Left) {
         moveFigureLeft();
       } else if (action == Right) {
@@ -506,21 +504,6 @@ void userInput(UserAction_t action, bool hold) {
         state->pause = 0;
       } else if (action == Terminate) {
         state->field = NULL;
-      }
-      break;
-    case kGameOver:
-      if (action == Terminate) {
-        state->field = NULL;
-        // Выход из игры
-      } else if (action == Start) {
-        // начинаем заново
-        // очищается поле field
-        clearField();
-        // очищаеюся статистика
-        restartGameStats();
-        // генерируются фигуры
-        // state.fsm = kMove
-        state->fsm = kMove;
       }
       break;
       mvprintw(28, 28, "| state->fsm = %d  ", state->fsm);
