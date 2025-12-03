@@ -16,9 +16,7 @@ void gameLoop() {
   bool hold;
   int cnt = 0;
   while (run_game) {
-    hold = getAction(&key_action);  // <--
-    mvprintw(25, 28, "| hold = %d", hold);
-    mvprintw(26, 28, "| cnt = %d", cnt++);
+    hold = getAction(&key_action);      // <--
     userInput(key_action, hold);        // -->
     state_info = updateCurrentState();  // <--
     if (state_info.field == NULL) {
@@ -31,27 +29,22 @@ void gameLoop() {
 
 // 5. Функция отрисовки статистики с данными
 void drawInfo(GameInfo_t state_info) {
-    // Отрисовка статистики с данными
-    mvprintw(0, 21, "Score = %d", state_info.score);
-    mvprintw(1, 21, "High score = %d", state_info.high_score);
-    mvprintw(2, 21, "Level = %d", state_info.level);
-    mvprintw(3, 21, "Speed = %d", state_info.speed);
+  // Отрисовка статистики с данными
+  mvprintw(0, 21, "Score = %d", state_info.score);
+  mvprintw(1, 21, "High score = %d", state_info.high_score);
+  mvprintw(2, 21, "Level = %d", state_info.level);
+  mvprintw(3, 21, "Speed = %d", state_info.speed);
 }
 // 6. Функция отрисовки легенды
-void drawLegend(){
-  char *legenda[9] = {
-    " Process | Key ",
-    "---------|-----",
-    "  START  | Enter",
-    "  EXIT   | Q" ,
-    "  PAUSE  | P",
-    "   UP    | ^",
-    "  DOWN   | V",
-    "  RIGHT  | ->",
-    "  LEFT   | <-",
+void drawLegend() {
+  char *legenda[11] = {
+      "________________",  "| Process | Key ",  "|---------|-----",
+      "|  START  | Enter", "|  EXIT   | Q",     "|  PAUSE  | P",
+      "|   UP    | ^",     "|  DOWN   | V",     "|  RIGHT  | ->",
+      "|  LEFT   | <-",    "|  ACTION | Space",
   };
-  for(int i = 0; i < 9; i ++ ){
-    mvprintw(i + 13, 21, legenda[i]);
+  for (int i = 0; i < 11; i++) {
+    mvprintw(i + 6, 30, legenda[i]);
   }
 }
 

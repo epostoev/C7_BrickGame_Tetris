@@ -4,16 +4,12 @@ TetrisState_t* getTetrisInfo() {
   // Создание массива field;
   static int field[20][10] = {0};
   static int* rows[20];
-
   // Создание массива next;
   static int next[4][4] = {0};
   static int* next_rows[4];
-
   // Создание массива current
   static int current[4][4] = {0}, *current_rows[4];
-
   static TetrisState_t* ptr_tetris_info = NULL;
-
   if (ptr_tetris_info == NULL) {
     for (int i = 0; i < 20; i++) {
       rows[i] = field[i];  // назначаем указатели на ряды массива field
@@ -35,7 +31,6 @@ TetrisState_t* getTetrisInfo() {
         .fsm = kStart,
         .update_interval = 1000,
     };
-
     FILE* fileHighScore = fopen("Record.txt", "r");
     if (fileHighScore != NULL) {
       fscanf(fileHighScore, "%d", &tetris_info.high_score);
@@ -45,12 +40,10 @@ TetrisState_t* getTetrisInfo() {
       fprintf(fileHighScore, "%d", tetris_info.high_score);
       fclose(fileHighScore);
     }
-
     tetris_info.last_tick = currentTimeMs();
     ptr_tetris_info = &tetris_info;
     srand(time(NULL));
   }
-
   return ptr_tetris_info;
 }
 
@@ -180,7 +173,6 @@ void checkFullLines() {
       }
     }
     // Есть ли заполненная линия, то
-    mvprintw(31, 1, "cnt_666 = %d  ", cnt);
     if (cnt == 10) {
       state->lines_cleared++;
       for (int k = i; k > 0; k--) {
@@ -191,49 +183,27 @@ void checkFullLines() {
       }
       memset(state->field[0], 0, sizeof(int) * 10);
     }
-    if (state->lines_cleared > 0) {
-      mvprintw(32, 1, "lines_creared = %d  ", state->lines_cleared);
-    }
   }
   // Увеличиваем score в зависимости сколько линий удалилось
   int old_score = state->score;
-  mvprintw(30, 28, "| old_score = %d", state->score);
+
   sumScore();
 
   // Проверка на запись в поле high_score
-    if (state->score > state->high_score) {
-      state->high_score = state->score;
+  if (state->score > state->high_score) {
+    state->high_score = state->score;
 
     FILE* fileHighScore = fopen("Record.txt", "w");
-      if (fileHighScore != NULL) {
+    if (fileHighScore != NULL) {
       // fscanf(fileHighScore, "%d", state->high_score);
       fprintf(fileHighScore, "%d", state->high_score);
       fclose(fileHighScore);
-      mvprintw(35, 1, "NewREcordSaved %d: ", state->high_score);
-    } 
+    }
   }
-  // if (state->score > state->high_score) {
-  //   FILE* fileHighScore = fopen("Record.txt", "r");
-  //   if (fileHighScore == NULL) {
-  //     return;
-  //   } else {
-  //     fscanf(fileHighScore, "%d", &state->high_score);
-  //     fclose(fileHighScore);
-  //   }
-  //   state->high_score = state->score;
-  //   fileHighScore = fopen("Record.txt", "w");
-  //   fprintf(fileHighScore, "%d", state->high_score);
-  //   fclose(fileHighScore);
-  // }
-
   int new_score = state->score;
-  mvprintw(31, 28, "| new_score = %d", state->score);
   int old_lvl = old_score / 600;
   int new_lvl = new_score / 600;
-  mvprintw(32, 28, "| old_lvl = %d", old_lvl);
-  mvprintw(33, 28, "| new_lvl = %d", new_lvl);
   if (new_lvl > old_lvl && state->lines_cleared > 0 && state->level <= 10) {
-    mvprintw(34, 28, "| calculate ");
     state->level++;
     state->speed++;
     state->update_interval = state->update_interval - 100;
@@ -244,8 +214,6 @@ GameInfo_t updateCurrentState() {
   // Создание массива state_info;
   static My_Counter current = {0};
   TetrisState_t* state = getTetrisInfo();
-  mvprintw(22, 1, "fsm = %d (0=Start, 1=Pause, 2=Move)", state->fsm);
-  mvprintw(23, 1, "timeToShift = %d", timeToShift);
   if (state->field != NULL) {  // Вызов Terminate
     if (state->fsm == kMove && timeToShift()) {
       if (false == moveFigureDown()) {
@@ -256,7 +224,6 @@ GameInfo_t updateCurrentState() {
         // Проверка на завершение игры
         // Если заполнен нулевой ряд,
         // Если в нулевом ряду есть хотя бы одна
-        // то GameOver (!!!!!) <----------------------------
         for (int i = 0; i < 10 && state->fsm != kGameOver; i++) {
           if (state->field[0][i] == 1) {
             state->fsm = kGameOver;
@@ -269,7 +236,6 @@ GameInfo_t updateCurrentState() {
       }
     }
   }
-  mvprintw(29, 28, "| cnt_1 = %d", current.cnt1++);
   return getGameInfo();
 }
 
@@ -345,12 +311,8 @@ bool moveFigureDown() {
   if (canPlaceAt(state, state->x, ny)) {
     state->y = ny;
     moved = true;
-  } else {
-    // Фигура достигла конца - здесь будет логика "залочить и создать новую"
-    // lockCurrentAndSpawnNext();
   }
   addCurrentInField();
-  mvprintw(24, 1, "isCanMoveDown = %d  ", moved);
   return moved;
 }
 
@@ -404,11 +366,6 @@ void rotateFigure() {
 bool timeToShift() {
   TetrisState_t* game = getTetrisInfo();
   unsigned long now = currentTimeMs();
-
-  mvprintw(28, 1, "now = %lu", now);
-  mvprintw(29, 1, "last_tick = %lu", game->last_tick);
-  mvprintw(30, 1, "dif = %lu", now - game->last_tick);
-
   if (now - game->last_tick >= game->update_interval) {
     game->last_tick = now;
     return true;  // TODO: FIXME
@@ -468,9 +425,7 @@ void userInput(UserAction_t action, bool hold) {
   if (hold == false) {
     return;
   }
-  // Добавить конечный автомат;
   TetrisState_t* state = getTetrisInfo();
-  mvprintw(27, 28, "| 27:state->fsm = %d  ", state->fsm);
   switch (state->fsm) {
     case kStart:
     case kGameOver:
@@ -493,7 +448,6 @@ void userInput(UserAction_t action, bool hold) {
       } else if (action == Pause) {
         state->fsm = kPause;
         state->pause = 1;
-        mvprintw(28, 28, "| state->fsm = %d  ", state->fsm);
       } else if (action == Terminate) {
         state->field = NULL;
       }
@@ -506,8 +460,6 @@ void userInput(UserAction_t action, bool hold) {
         state->field = NULL;
       }
       break;
-      mvprintw(28, 28, "| state->fsm = %d  ", state->fsm);
-
     default:
       break;
   }
