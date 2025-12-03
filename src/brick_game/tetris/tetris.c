@@ -42,7 +42,7 @@ TetrisState_t* getTetrisInfo() {
       fclose(fileHighScore);
     } else {
       fileHighScore = fopen("Record.txt", "w");
-      fprintf(fileHighScore, "%d", &tetris_info.high_score);
+      fprintf(fileHighScore, "%d", tetris_info.high_score);
       fclose(fileHighScore);
     }
 
