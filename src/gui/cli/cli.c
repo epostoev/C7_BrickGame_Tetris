@@ -29,6 +29,32 @@ void gameLoop() {
   }
 }
 
+// 5. Функция отрисовки статистики с данными
+void drawInfo(GameInfo_t state_info) {
+    // Отрисовка статистики с данными
+    mvprintw(0, 21, "Score = %d", state_info.score);
+    mvprintw(1, 21, "High score = %d", state_info.high_score);
+    mvprintw(2, 21, "Level = %d", state_info.level);
+    mvprintw(3, 21, "Speed = %d", state_info.speed);
+}
+
+void drawLegend(){
+  char *legenda[9] = {
+    " Process | Key ",
+    "---------|-----",
+    "  START  | Enter",
+    "  EXIT   | Q" ,
+    "  PAUSE  | P",
+    "   UP    | ^",
+    "  DOWN   | V",
+    "  RIGHT  | ->",
+    "  LEFT   | <-",
+  };
+  for(int i = 0; i < 9; i ++ ){
+    mvprintw(i + 13, 21, legenda[i]);
+  }
+}
+
 void drawStateInfo(GameInfo_t state_info) {
   // отрисовака поля
   for (int i = 0; i < 20; i++) {
@@ -41,7 +67,6 @@ void drawStateInfo(GameInfo_t state_info) {
     }
   }
   // Отрисовка next;
-  mvprintw(6, 21, "%s", "Next:");
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       if (state_info.next[i][j]) {
@@ -51,14 +76,10 @@ void drawStateInfo(GameInfo_t state_info) {
       }
     }
   }
-
-  // Отрисовка статистики с данными
-  mvprintw(0, 21, "Score = %d", state_info.score);
-  mvprintw(1, 21, "High score = %d", state_info.high_score);
-  mvprintw(2, 21, "Level = %d", state_info.level);
-  mvprintw(3, 21, "Speed = %d", state_info.speed);
-
+  // 5. Отрисовка статистики с данными
+  drawInfo(state_info);
   // Отрисовка легенды
+  drawLegend();
 }
 
 bool getAction(UserAction_t *key_action) {
