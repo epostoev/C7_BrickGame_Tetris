@@ -16,9 +16,7 @@ void gameLoop() {
   bool hold;
   int cnt = 0;
   while (run_game) {
-    hold = getAction(&key_action);  // <--
-    mvprintw(25, 28, "| hold = %d", hold);
-    mvprintw(26, 28, "| cnt = %d", cnt++);
+    hold = getAction(&key_action);      // <--
     userInput(key_action, hold);        // -->
     state_info = updateCurrentState();  // <--
     if (state_info.field == NULL) {
@@ -26,6 +24,27 @@ void gameLoop() {
     } else {
       drawStateInfo(state_info);  // -->
     }
+  }
+}
+
+// 5. Функция отрисовки статистики с данными
+void drawInfo(GameInfo_t state_info) {
+  // Отрисовка статистики с данными
+  mvprintw(0, 21, "Score = %d", state_info.score);
+  mvprintw(1, 21, "High score = %d", state_info.high_score);
+  mvprintw(2, 21, "Level = %d", state_info.level);
+  mvprintw(3, 21, "Speed = %d", state_info.speed);
+}
+// 6. Функция отрисовки легенды
+void drawLegend() {
+  char *legenda[11] = {
+      "________________",  "| Process | Key ",  "|---------|-----",
+      "|  START  | Enter", "|  EXIT   | Q",     "|  PAUSE  | P",
+      "|   UP    | ^",     "|  DOWN   | V",     "|  RIGHT  | ->",
+      "|  LEFT   | <-",    "|  ACTION | Space",
+  };
+  for (int i = 0; i < 11; i++) {
+    mvprintw(i + 6, 30, legenda[i]);
   }
 }
 
@@ -41,7 +60,6 @@ void drawStateInfo(GameInfo_t state_info) {
     }
   }
   // Отрисовка next;
-  mvprintw(6, 21, "%s", "Next:");
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       if (state_info.next[i][j]) {
@@ -51,14 +69,10 @@ void drawStateInfo(GameInfo_t state_info) {
       }
     }
   }
-
-  // Отрисовка статистики с данными
-  mvprintw(0, 21, "Score = %d", state_info.score);
-  mvprintw(1, 21, "High score = %d", state_info.high_score);
-  mvprintw(2, 21, "Level = %d", state_info.level);
-  mvprintw(3, 21, "Speed = %d", state_info.speed);
-
-  // Отрисовка легенды
+  // 5. Отрисовка статистики с данными
+  drawInfo(state_info);
+  // 6. Функция отрисовки легенды
+  drawLegend();
 }
 
 bool getAction(UserAction_t *key_action) {
@@ -70,43 +84,27 @@ bool getAction(UserAction_t *key_action) {
       case 10:
       case 13:
         *key_action = Start;
-        mvprintw(25, 1, "      ");
-        mvprintw(25, 1, "Start");
         break;
       case KEY_P_LOWER:
         *key_action = Pause;
-        mvprintw(25, 1, "      ");
-        mvprintw(25, 1, "Pause");
         break;
       case KEY_Q_LOWER:
         *key_action = Terminate;
         break;
       case KEY_LEFT:
         *key_action = Left;
-        mvprintw(25, 1, "      ");
-        mvprintw(25, 1, "Left");
-        mvprintw(26, 1, "key_action = %p", (void *)key_action);
-        mvprintw(27, 1, "key_action_number = %d", *key_action);
         break;
       case KEY_RIGHT:
         *key_action = Right;
-        mvprintw(25, 1, "      ");
-        mvprintw(25, 1, "Right");
-        mvprintw(26, 1, "key_action = %p", (void *)key_action);
-        mvprintw(27, 1, "key_action_number = %d", *key_action);
         break;
       case KEY_UP:
         *key_action = Up;
         break;
       case KEY_DOWN:
         *key_action = Down;
-        mvprintw(25, 1, "      ");
-        mvprintw(25, 1, "Down");
         break;
       case KEY_SPACE:
         *key_action = Action;
-        mvprintw(25, 1, "      ");
-        mvprintw(25, 1, "Action");
         break;
       default:
         return_err = false;
