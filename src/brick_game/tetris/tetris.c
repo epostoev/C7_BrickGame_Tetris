@@ -1,6 +1,6 @@
 #include "tetris.h"
 
-TetrisState_t* getTetrisInfo() {
+TetrisState_t* getTetrisInfo(void) {
   // Создание массива field;
   static int field[20][10] = {0};
   static int* rows[20];
@@ -48,7 +48,7 @@ TetrisState_t* getTetrisInfo() {
 }
 
 // 3. Функция очистки массива next
-void clearNext() {
+void clearNext(void) {
   TetrisState_t* state = getTetrisInfo();
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
@@ -62,45 +62,45 @@ void drawFigureI(int** next) {
   next[2][1] = 1;  // . . . .
   next[2][2] = 1;  // [][][][]
   next[2][3] = 1;  // . . . .
-};
+}
 void drawFigureJ(int** next) {
   next[1][0] = 1;  // . . . .
   next[2][0] = 1;  // []. . .
   next[2][1] = 1;  // [][][].
   next[2][2] = 1;  // . . . .
-};
+}
 void drawFigureL(int** next) {
   next[1][2] = 1;  // . . . .
   next[2][0] = 1;  // . . [].
   next[2][1] = 1;  // [][][].
   next[2][2] = 1;  // . . . .
-};
+}
 void drawFigureO(int** next) {
   next[1][1] = 1;  // . . . .
   next[1][2] = 1;  // . [][].
   next[2][1] = 1;  // . [][].
   next[2][2] = 1;  // . . . .
-};
+}
 void drawFigureS(int** next) {
   next[1][1] = 1;  // . . . .
   next[1][2] = 1;  // . [][].
   next[2][0] = 1;  // [][]. .
   next[2][1] = 1;  // . . . .
-};
+}
 void drawFigureT(int** next) {
   next[1][1] = 1;  // . . . .
   next[2][0] = 1;  // . []. .
   next[2][1] = 1;  // [][][] .
   next[2][2] = 1;  // . . . .
-};
+}
 void drawFigureZ(int** next) {
   next[1][0] = 1;  // . . . .
   next[1][1] = 1;  // [][] . .
   next[2][1] = 1;  // . [][].
   next[2][2] = 1;  // . . . .
-};
+}
 
-void generateFigure() {
+void generateFigure(void) {
   TetrisState_t* state = getTetrisInfo();
   TypeFigure_t type_figure;
   void (*const get_figure[count_figure])(int**) = {
@@ -131,7 +131,7 @@ bool isPointInField(int x, int y) {
   return (x >= 0 && x < 10 && y >= 0 && y < 20);
 }
 
-void addCurrentInField() {
+void addCurrentInField(void) {
   TetrisState_t* state = getTetrisInfo();
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
@@ -146,7 +146,7 @@ void addCurrentInField() {
   }
 }
 
-void sumScore() {
+void sumScore(void) {
   TetrisState_t* state = getTetrisInfo();
   if (state->lines_cleared == 1) {
     state->score = state->score + 100;
@@ -162,7 +162,7 @@ void sumScore() {
   }
 }
 
-void checkFullLines() {
+void checkFullLines(void) {
   TetrisState_t* state = getTetrisInfo();
   state->lines_cleared = 0;
   for (int i = 0; i < 20; i++) {
@@ -210,9 +210,9 @@ void checkFullLines() {
   }
 }
 
-GameInfo_t updateCurrentState() {
+GameInfo_t updateCurrentState(void) {
   // Создание массива state_info;
-  static My_Counter current = {0};
+  // static My_Counter current = {0};
   TetrisState_t* state = getTetrisInfo();
   if (state->field != NULL) {  // Вызов Terminate
     if (state->fsm == kMove && timeToShift()) {
@@ -239,7 +239,7 @@ GameInfo_t updateCurrentState() {
   return getGameInfo();
 }
 
-GameInfo_t getGameInfo() {
+GameInfo_t getGameInfo(void) {
   GameInfo_t current_state = {0};
   TetrisState_t* state = getTetrisInfo();
   current_state.score = state->score;
@@ -252,7 +252,7 @@ GameInfo_t getGameInfo() {
   return current_state;
 }
 // 4. Функция очистки массива сгккуте
-void clearCurrent() {
+void clearCurrent(void) {
   TetrisState_t* state = getTetrisInfo();
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
@@ -274,7 +274,7 @@ bool canPlaceAt(const TetrisState_t* state, int nx, int ny) {
       if (state->current[i][j]) {
         int x = nx + j, y = ny + i;
         if (isPointOutField(x, y) ||
-            isPointInField(x, y) && state->field[y][x]) {
+            (isPointInField(x, y) && state->field[y][x])) {
           ok = false;  // 1. Переименовать переменную ok
         }
       }
@@ -283,7 +283,7 @@ bool canPlaceAt(const TetrisState_t* state, int nx, int ny) {
   return ok;
 }
 
-void moveFigureLeft() {
+void moveFigureLeft(void) {
   TetrisState_t* state = getTetrisInfo();
   clearCurrent();         // убрать старое положение
   int nx = state->x - 1;  // кандидатная позиция
@@ -293,7 +293,7 @@ void moveFigureLeft() {
   addCurrentInField();  // дорисовать обратно
 }
 
-void moveFigureRight() {
+void moveFigureRight(void) {
   TetrisState_t* state = getTetrisInfo();
   clearCurrent();
   int nx = state->x + 1;
@@ -303,7 +303,7 @@ void moveFigureRight() {
   addCurrentInField();
 }
 
-bool moveFigureDown() {
+bool moveFigureDown(void) {
   TetrisState_t* state = getTetrisInfo();
   clearCurrent();
   int ny = state->y + 1;
@@ -317,7 +317,7 @@ bool moveFigureDown() {
 }
 
 // Поворот фигуры на 90 градусов по часовой стрелке
-void rotateFigure() {
+void rotateFigure(void) {
   TetrisState_t* state = getTetrisInfo();
 
   // Создаём временный массив для повёрнутой фигуры
@@ -363,24 +363,25 @@ void rotateFigure() {
   addCurrentInField();
 }
 
-bool timeToShift() {
+bool timeToShift(void) {
   TetrisState_t* game = getTetrisInfo();
   unsigned long now = currentTimeMs();
+  bool time_to_shift = false;
   if (now - game->last_tick >= game->update_interval) {
     game->last_tick = now;
-    return true;  // TODO: FIXME
+    time_to_shift = true;
   }
-  return false;
+  return time_to_shift;
 }
 
-unsigned long currentTimeMs() {
+unsigned long currentTimeMs(void) {
   struct timespec ts;
   clock_gettime(CLOCK_MONOTONIC, &ts);
   return (unsigned long)(ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 }
 
 // 1. Функция очистки поля
-void clearField() {
+void clearField(void) {
   TetrisState_t* state = getTetrisInfo();
 
   // Очитска поля 20х10
@@ -392,7 +393,7 @@ void clearField() {
 }
 
 // 2. Функция сброса статистики
-void restartGameStats() {
+void restartGameStats(void) {
   TetrisState_t* state = getTetrisInfo();
   state->score = 0;
   state->level = 0;
@@ -404,7 +405,7 @@ void restartGameStats() {
   state->last_tick = currentTimeMs();
 }
 
-void restartGame() {
+void restartGame(void) {
   TetrisState_t* state = getTetrisInfo();
 
   // 1. Очищаем поле

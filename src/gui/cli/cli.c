@@ -1,6 +1,6 @@
 #include "cli.h"
 
-void initNcurses() {
+void initNcurses(void) {
   initscr();  // инициализация ncurses
   cbreak();   // отключение буферизации ввода
   keypad(stdscr, true);  // включение обработки функциональных клавищ)
@@ -9,12 +9,12 @@ void initNcurses() {
   timeout(100);
 }
 
-void gameLoop() {
+void gameLoop(void) {
   UserAction_t key_action;
   GameInfo_t state_info;
   bool run_game = true;
   bool hold;
-  int cnt = 0;
+  //   int cnt = 0;
   while (run_game) {
     hold = getAction(&key_action);      // <--
     userInput(key_action, hold);        // -->
@@ -36,7 +36,7 @@ void drawInfo(GameInfo_t state_info) {
   mvprintw(3, 21, "Speed = %d", state_info.speed);
 }
 // 6. Функция отрисовки легенды
-void drawLegend() {
+void drawLegend(void) {
   char *legenda[11] = {
       "________________",  "| Process | Key ",  "|---------|-----",
       "|  START  | Enter", "|  EXIT   | Q",     "|  PAUSE  | P",

@@ -1,3 +1,6 @@
+#ifndef BRICK_GAME_H
+#define BRICK_GAME_H
+
 #include <stdbool.h>
 typedef enum {
   Start,
@@ -22,6 +25,6 @@ typedef struct {
 
 void userInput(UserAction_t action, bool hold);
 
-GameInfo_t updateCurrentState();
+GameInfo_t updateCurrentState(void);
 
-// TODO: Добавить защиту define guard
+#endif  // BRICK_GAME_H
