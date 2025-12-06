@@ -1,74 +1,86 @@
+# Library configuration
+LIB_TETRIS := brick_game/tetris/tetris.a
+OBJ_TETRIS := brick_game/tetris/tetris.o
+SRC_TETRIS := brick_game/tetris/tetris.c
+HDR_TETRIS := brick_game/tetris/tetris.h
+HDR_API := brick_game/brick_game.h
+
 # Compiler and flags
 CC := gcc
 CFLAGS := -std=c11 -Wall -Werror -Wextra -pedantic
 LDFLAGS := -lncurses
-TESTFLAGS := -lcheck -lm -lpthread -lrt -lsubunit
-GCOVFLAGS := -fprofile-arcs -ftest-coverage
-CLANG_FORMAT ?= clang-format
+AR := ar
+ARFLAGS := rcs
 
 # Directories
-SRC_DIR := .
 BUILD_DIR := build
-OBJ_DIR := $(BUILD_DIR)/obj
+OBJ_DIR := $(BUILD_DIR)/1/obj
+LIB_DIR := $(BUILD_DIR)/lib
 BIN_DIR := $(BUILD_DIR)/bin
-TEST_DIR := tests
-DOC_DIR := documentation
-DIST_DIR := dist
-INSTALL_DIR ?= /usr/local
-PREFIX ?= $(INSTALL_DIR)
 
 # Source files
 SOURCES := \
 	main.c \
 	gui/cli/cli.c \
-	brick_game/tetris/tetris.c \
+	brick_game/tetris/tetris.c
 
 HEADERS := \
 	gui/cli/cli.h \
 	brick_game/brick_game.h \
-	brick_game/tetris/tetris.h \
+	brick_game/tetris/tetris.h
 
-# Object files
-OBJECTS := $(addprefix $(OBJ_DIR)/, $(SOURCES:.c=.o))
+# Object files (исправлено: правильные пути в build/)
+OBJ_FILES := \
+	$(OBJ_DIR)/main.o \
+	$(OBJ_DIR)/gui/cli/cli.o
 
-# Target executable
+# Executable
 TARGET := tetris
 TARGET_PATH := $(BIN_DIR)/$(TARGET)
 
+# Main target: all
+# Builds static library AND executable
+
 .PHONY: all
-all: $(TARGET_PATH)
+all: $(LIB_TETRIS) $(TARGET_PATH)
 
-# Build the main executable
-$(TARGET_PATH): $(OBJECTS) | $(BIN_DIR)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $@ $(LDFLAGS)
-	@echo "✓ Build complete: $(TARGET_PATH)"
+# ============================================================================
+# TODO: Сборка статической библиотеки tetris.a
+# ============================================================================
+# Статическая библиотека создаётся командой ar (архиватор)
+# ar rcs - создаёт архив из объектных файлов
+# r = replace (заменить/добавить)
+# c = create (создать если не существует)
+# s = index (создать индекс символов)
 
-# Compile source files to object files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+$(LIB_TETRIS): $(OBJ_TETRIS)
+	$(AR) $(ARFLAGS) $@ $^
+
+# Компиляция tetris.c в tetris.o
+# $(OBJ_TETRIS): $(SRC_TETRIS) $(HDR_TETRIS) $(HDR_API)
+# 	$(CC) $(CFLAGS) -c $< -o $@
+$(OBJ_TETRIS): $(SRC_TETRIS)
+	$(CC) $(CFLAGS) -c $(LIB_TETRIS) -o $(OBJ_TETRIS)
+
+# ============================================================================
+# Executable target (исправлено!)
+# ============================================================================
+# Было: TARGET_PATH: - неправильно (нет $)
+# Стало: $(TARGET_PATH): - правильно
+
+$(TARGET_PATH): $(LIB_TETRIS) $(OBJ_FILES) | $(BIN_DIR)
+	$(CC) $(CFLAGS) $(OBJ_FILES) $(LIB_TETRIS) -o $@ $(LDFLAGS)
+
+$(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-#TODO что делает @mkdir -p $(dir $@)
-#TODO что делает $(CC) $(CFLAGS) -c $< -o $@
-#TODO сделать цель на сборку статической библиотеки tetris.a
-#TODO Эта библиотека должна быть использована в 43 строчке в цели ALL
+# ============================================================================
+# Directory creation
+# ============================================================================
 
-
-
-# Create necessary directories
-$(OBJ_DIR) $(BIN_DIR) $(DIST_DIR) $(GCOV_DIR) $(DOC_DIR):
+$(OBJ_DIR) $(BIN_DIR) $(LIB_DIR) $(GCOV_DIR):
 	@mkdir -p $@
 
-clean:
-	rm a.out
-format:
-	@$(CLANG_FORMAT) -i $(SOURCES)
-#TODO добавить цель на создание файла .clang-format (копирование из материалс)
-
-format-check:
-	@$(CLANG_FORMAT) -n $(SOURCES)
-
-test:
-#TODO Сделать цель на покрытие и на тест
-
-gcov_report:
+.PHONY: rebuild
+rebuild: clean all
