@@ -14,7 +14,7 @@ ARFLAGS := rcs
 
 # Directories
 BUILD_DIR := build
-OBJ_DIR := $(BUILD_DIR)/1/obj
+OBJ_DIR := $(BUILD_DIR)/obj
 LIB_DIR := $(BUILD_DIR)/lib
 BIN_DIR := $(BUILD_DIR)/bin
 
@@ -44,9 +44,7 @@ TARGET_PATH := $(BIN_DIR)/$(TARGET)
 .PHONY: all
 all: $(LIB_TETRIS) $(TARGET_PATH)
 
-# ============================================================================
-# TODO: Сборка статической библиотеки tetris.a
-# ============================================================================
+# Сборка статической библиотеки tetris.a
 # Статическая библиотека создаётся командой ar (архиватор)
 # ar rcs - создаёт архив из объектных файлов
 # r = replace (заменить/добавить)
@@ -54,22 +52,15 @@ all: $(LIB_TETRIS) $(TARGET_PATH)
 # s = index (создать индекс символов)
 
 $(LIB_TETRIS): $(OBJ_TETRIS)
-	$(AR) $(ARFLAGS) $@ $^
+	$(AR) $(ARFLAGS) $(LIB_TETRIS) $(OBJ_TETRIS)
 
 # Компиляция tetris.c в tetris.o
-# $(OBJ_TETRIS): $(SRC_TETRIS) $(HDR_TETRIS) $(HDR_API)
-# 	$(CC) $(CFLAGS) -c $< -o $@
 $(OBJ_TETRIS): $(SRC_TETRIS)
-	$(CC) $(CFLAGS) -c $(LIB_TETRIS) -o $(OBJ_TETRIS)
+	$(CC) $(CFLAGS) -c $(SRC_TETRIS) -o $(OBJ_TETRIS)
 
-# ============================================================================
-# Executable target (исправлено!)
-# ============================================================================
-# Было: TARGET_PATH: - неправильно (нет $)
-# Стало: $(TARGET_PATH): - правильно
-
-$(TARGET_PATH): $(LIB_TETRIS) $(OBJ_FILES) | $(BIN_DIR)
-	$(CC) $(CFLAGS) $(OBJ_FILES) $(LIB_TETRIS) -o $@ $(LDFLAGS)
+# Executable target
+$(TARGET_PATH): $(LIB_TETRIS) $(OBJ_FILES)
+	$(CC) $(CFLAGS) $(OBJ_FILES) $(LIB_TETRIS) -o $(TARGET) $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
 	@mkdir -p $(dir $@)
@@ -79,8 +70,8 @@ $(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
 # Directory creation
 # ============================================================================
 
-$(OBJ_DIR) $(BIN_DIR) $(LIB_DIR) $(GCOV_DIR):
-	@mkdir -p $@
+# $(OBJ_DIR) $(BIN_DIR) $(LIB_DIR) $(GCOV_DIR):
+# 	@mkdir -p $@
 
 .PHONY: rebuild
 rebuild: clean all
