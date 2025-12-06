@@ -1,4 +1,7 @@
-#include <ncurses.h>  // УБРАТЬ ПРИ СДАЧЕ
+#ifndef TETRIS_H
+#define TETRIS_H
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -47,18 +50,20 @@ typedef enum {
   count_figure,
 } TypeFigure_t;
 
-GameInfo_t getGameInfo();
+GameInfo_t getGameInfo(void);
 
-unsigned long currentTimeMs();
-bool timeToShift();
-bool moveFigureDown();
-void clearCurrent();
-void addCurrentInField();
-void generateFigure();
+unsigned long currentTimeMs(void);
+bool timeToShift(void);
+bool moveFigureDown(void);
+void clearCurrent(void);
+void addCurrentInField(void);
+void generateFigure(void);
 bool isPointOutField(int x, int y);
 bool canPlaceAt(const TetrisState_t* state, int nx, int ny);
-void rotateFigure();
-void moveFigureLeft();
-void moveFigureRight();
-TetrisState_t* getTetrisInfo();
+void rotateFigure(void);
+void moveFigureLeft(void);
+void moveFigureRight(void);
+TetrisState_t* getTetrisInfo(void);
 // Добавать обьявление функций
+
+#endif // TETRIS_H
