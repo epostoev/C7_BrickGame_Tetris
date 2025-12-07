@@ -2,7 +2,6 @@
 LIB_TETRIS := brick_game/tetris/tetris.a
 OBJ_TETRIS := brick_game/tetris/tetris.o
 SRC_TETRIS := brick_game/tetris/tetris.c
-HDR_TETRIS := brick_game/tetris/tetris.h
 HDR_API := brick_game/brick_game.h
 
 # Compiler and flags
@@ -18,18 +17,8 @@ OBJ_DIR := $(BUILD_DIR)/obj
 LIB_DIR := $(BUILD_DIR)/lib
 BIN_DIR := $(BUILD_DIR)/bin
 
-# Source files
-SOURCES := \
-	main.c \
-	gui/cli/cli.c \
-	brick_game/tetris/tetris.c
 
-HEADERS := \
-	gui/cli/cli.h \
-	brick_game/brick_game.h \
-	brick_game/tetris/tetris.h
-
-# Object files (исправлено: правильные пути в build/)
+# Object files
 OBJ_FILES := \
 	$(OBJ_DIR)/main.o \
 	$(OBJ_DIR)/gui/cli/cli.o
@@ -37,6 +26,11 @@ OBJ_FILES := \
 # Executable
 TARGET := tetris
 TARGET_PATH := $(BIN_DIR)/$(TARGET)
+
+
+# System directories
+
+INSTALL_BINDIR := /usr/local
 
 # Main target: all
 # Builds static library AND executable
@@ -59,19 +53,35 @@ $(OBJ_TETRIS): $(SRC_TETRIS)
 	$(CC) $(CFLAGS) -c $(SRC_TETRIS) -o $(OBJ_TETRIS)
 
 # Executable target
+# $@ - цель
 $(TARGET_PATH): $(LIB_TETRIS) $(OBJ_FILES)
-	$(CC) $(CFLAGS) $(OBJ_FILES) $(LIB_TETRIS) -o $(TARGET) $(LDFLAGS)
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) $(OBJ_FILES) $(LIB_TETRIS) -o $@ $(LDFLAGS)
 
-$(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
-	@mkdir -p $(dir $@)
+# $(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
+# 	@mkdir -p $(dir $@)
+# 	$(CC) $(CFLAGS) -c $< -o $@
+
+# $< - зависимость
+# $@ - цель
+
+$(OBJ_DIR)/main.o: main.c
+	@mkdir -p $(OBJ_DIR)
+	@echo "COMPILING: $@"
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# ============================================================================
-# Directory creation
-# ============================================================================
+$(OBJ_DIR)/gui/cli/cli.o: gui/cli/cli.c
+	mkdir -p $(OBJ_DIR)/gui/cli/
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# $(OBJ_DIR) $(BIN_DIR) $(LIB_DIR) $(GCOV_DIR):
-# 	@mkdir -p $@
+# Установка tetris в систему
+install: all
+	@echo "Installing $(TARGET)"
+	install -d $(BIN_DIR)
+	install -m 755 $(TARGET_PATH) $(INSTALL_BINDIR)/$(TARGET)
+
+
+
 
 .PHONY: rebuild
 rebuild: clean all
