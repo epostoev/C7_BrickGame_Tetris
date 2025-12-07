@@ -30,7 +30,7 @@ TARGET_PATH := $(BIN_DIR)/$(TARGET)
 
 # System directories
 
-INSTALL_BINDIR := /usr/local
+INSTALL_BINDIR := /usr/local/bin
 
 # Main target: all
 # Builds static library AND executable
