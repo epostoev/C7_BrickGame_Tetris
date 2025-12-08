@@ -30,7 +30,7 @@ TARGET_PATH := $(BIN_DIR)/$(TARGET)
 
 # System directories
 
-INSTALL_BINDIR := /usr/local/bin
+INSTALL_BINDIR := ~/.local/bin
 
 # Main target: all
 # Builds static library AND executable
@@ -76,11 +76,19 @@ $(OBJ_DIR)/gui/cli/cli.o: gui/cli/cli.c
 
 # Установка tetris в систему
 install: all
-	@echo "Installing $(TARGET)"
-	install -d $(BIN_DIR)
+	@echo "Installing $(TARGET) ....."
+	install -d $(INSTALL_BINDIR)
 	install -m 755 $(TARGET_PATH) $(INSTALL_BINDIR)/$(TARGET)
+	@echo "	Installation $(TARGET) complete!"
+	@echo "	Installed $(TARGET) to $(INSTALL_BINDIR)/$(TARGET)"
+	@echo "	Run with: $(TARGET)"
 
 
+#  Uninstall tetris
+uninstall:
+	@echo "Uninstalling $(TARGET) ...."
+	rm -f $(INSTALL_BINDIR)/$(TARGET)
+	@echo "	Uninstalled from $(INSTALL_BINDIR)/$(TARGET)"
 
 
 .PHONY: rebuild
