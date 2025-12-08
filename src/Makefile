@@ -87,8 +87,13 @@ install: all
 #  Uninstall tetris
 uninstall:
 	@echo "Uninstalling $(TARGET) ...."
-	rm -f $(INSTALL_BINDIR)/$(TARGET)
+	rm -rf $(INSTALL_BINDIR)/$(TARGET)
 	@echo "	Uninstalled from $(INSTALL_BINDIR)/$(TARGET)"
+clean:
+	@echo " Cleaning ....."
+	@rm -rf $(BUILD_DIR)
+	@rm -rf $(LIB_TETRIS) $(OBJ_TETRIS)
+	@echo "V Clean complete"
 
 
 .PHONY: rebuild
