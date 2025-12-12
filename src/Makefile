@@ -1,3 +1,9 @@
+# Directories
+BUILD_DIR := build
+OBJ_DIR := $(BUILD_DIR)/obj
+LIB_DIR := $(BUILD_DIR)/lib
+BIN_DIR := $(BUILD_DIR)/bin
+
 # Executable
 TARGET := tetris
 TARGET_PATH := $(BIN_DIR)/$(TARGET)
@@ -33,11 +39,6 @@ LDFLAGS := -lncurses
 AR := ar
 ARFLAGS := rcs
 
-# Directories
-BUILD_DIR := build
-OBJ_DIR := $(BUILD_DIR)/obj
-LIB_DIR := $(BUILD_DIR)/lib
-BIN_DIR := $(BUILD_DIR)/bin
 
 # Файлы для включения
 DIST_FILES := \
@@ -57,7 +58,7 @@ OBJ_FILES := \
 
 # System directories
 
-INSTALL_BINDIR := ~/.local/bin
+INSTALL_BINDIR := $(HOME)/.local/bin
 
 # Main target: all
 # Builds static library AND executable
@@ -123,6 +124,7 @@ clean:
 	@rm -rf $(BUILD_DIR)
 	@rm -rf $(LIB_TETRIS) $(OBJ_TETRIS)
 	@rm -rf $(TARGET)
+	@echo "Cleaned complete!!!!"
 
 dist: clean
 	echo "Creating distribution archive..."
