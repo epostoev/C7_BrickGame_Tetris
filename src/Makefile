@@ -126,14 +126,10 @@ clean:
 	@rm -rf $(TARGET)
 	@echo "Cleaned complete!!!!"
 
+# Создание архива
+.PHONY: clean
 dist: clean
-	echo "Creating distribution archive..."
-	mkdir -p $(DIST_DIR)
-	mkdir -p /tmp/$(DIST_NAME)
-	cp $(DIST_FILES) /tmp/$(DIST_NAME) #TODO изменить комнду
-	tar -cvzf $(DIST_ARCHIVE) /tmp/$(DIST_NAME)
-	rm -rf /tmp/$(DIST_NAME)
-	echo "✓ Archive created: $(DIST_ARCHIVE)"
+	@tar -czvf ../$(DIST_NAME).tar.gz ./
 
 
 .PHONY: rebuild
