@@ -47,7 +47,6 @@ DIST_FILES := \
   $(SRC_CLI) \
   $(HDR_CLI) \
   $(HDR_API) \
-  Makefile
 
 
 # Object files
@@ -85,10 +84,6 @@ $(OBJ_TETRIS): $(SRC_TETRIS)
 $(TARGET_PATH): $(LIB_TETRIS) $(OBJ_FILES)
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $(OBJ_FILES) $(LIB_TETRIS) -o $@ $(LDFLAGS)
-
-# $(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
-# 	@mkdir -p $(dir $@)
-# 	$(CC) $(CFLAGS) -c $< -o $@
 
 # $< - зависимость
 # $@ - цель
@@ -130,6 +125,18 @@ clean:
 .PHONY: clean
 dist: clean
 	@tar -czvf ../$(DIST_NAME).tar.gz ./
+	
+format:
+	cp ../materials/linters/.clang-format ./
+	echo "Formating code...."
+	clang-format -i $(DIST_FILES)
+
+format-check:
+	cp ../materials/linters/.clang-format ./
+	echo "Check formating code...."
+	clang-format -n $(DIST_FILES)
+
+test: 
 
 
 .PHONY: rebuild

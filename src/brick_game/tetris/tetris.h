@@ -66,4 +66,4 @@ void moveFigureRight(void);
 TetrisState_t* getTetrisInfo(void);
 // Добавать обьявление функций
 
-#endif // TETRIS_H
+#endif  // TETRIS_H

@@ -13,4 +13,4 @@ void gameLoop(void);
 bool getAction(UserAction_t *key_action);
 void drawStateInfo(GameInfo_t state_info);
 
-#endif // CLI_H
+#endif  // CLI_H
