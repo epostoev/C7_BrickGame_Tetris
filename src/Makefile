@@ -130,12 +130,13 @@ format-check:
 	clang-format -n $(DIST_FILES)
 
 TEST := tests/test_tetris
-CHECK_FLUGS := -I $(HOME)/.local/include \
+CHECK_FLAGS := -I $(HOME)/.local/include \
 				-L $(HOME)/.local/lib \
 				-lcheck \
-				-pthread
+				-pthread \
+				-lncurses
 test: $(LIB_TETRIS)
-	gcc $(TEST).c $(LIB_TETRIS) -o $(TEST) $(CHECK_FLUGS) 
+	gcc $(TEST).c $(LIB_TETRIS) -o $(TEST) $(CHECK_FLAGS) 
 
 .PHONY: clean
 clean:
@@ -145,6 +146,21 @@ clean:
 	@rm -rf $(TARGET)
 	@rm -rf $(TEST)
 	@echo "Cleaned complete!!!!"
+
+GCOVFLAGS = -fprofile-arcs -ftest-coverage
+REPORT = GcovReport
+
+
+gcov_report:
+	gcc $(GCOVFLAGS) $(TEST).c $(SRC_TETRIS) $(SRC_CLI) $(CHECK_FLAGS) -o $(REPORT)
+	chmod +x $(REPORT)
+	./$(REPORT)
+	lcov -t "$(REPORT)" -o $(REPORT).info -c -d .
+	genhtml -o report $(REPORT).info
+	rm -rf ./*.gcno ./*.gcda ./$(REPORT).*
+	open ./report/index.html
+
+
 
 .PHONY: rebuild
 rebuild: clean all
