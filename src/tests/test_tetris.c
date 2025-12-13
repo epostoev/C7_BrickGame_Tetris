@@ -55,7 +55,7 @@ int main(void)
     int failed_count = srunner_ntests_failed(suite_runner);
     srunner_free(suite_runner);
 
-    int result_test = EXIT_SUCCESS
+    int result_test = EXIT_SUCCESS;
     if (failed_count != 0) {
         // Сигнализируем о том, что тестирование прошло неудачно.
         result_test = EXIT_FAILURE;

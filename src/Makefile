@@ -113,13 +113,6 @@ uninstall:
 	rm -rf $(INSTALL_BINDIR)/$(TARGET)
 	@echo "	Uninstalled from $(INSTALL_BINDIR)/$(TARGET)"
 
-.PHONY: clean
-clean:
-	@echo "Cleaning....."
-	@rm -rf $(BUILD_DIR)
-	@rm -rf $(LIB_TETRIS) $(OBJ_TETRIS)
-	@rm -rf $(TARGET)
-	@echo "Cleaned complete!!!!"
 
 # Создание архива
 .PHONY: clean
@@ -136,8 +129,22 @@ format-check:
 	echo "Check formating code...."
 	clang-format -n $(DIST_FILES)
 
-test: 
+TEST := tests/test_tetris
+CHECK_FLUGS := -I $(HOME)/.local/include \
+				-L $(HOME)/.local/lib \
+				-lcheck \
+				-pthread
+test: $(LIB_TETRIS)
+	gcc $(TEST).c $(LIB_TETRIS) -o $(TEST) $(CHECK_FLUGS) 
 
+.PHONY: clean
+clean:
+	@echo "Cleaning....."
+	@rm -rf $(BUILD_DIR)
+	@rm -rf $(LIB_TETRIS) $(OBJ_TETRIS)
+	@rm -rf $(TARGET)
+	@rm -rf $(TEST)
+	@echo "Cleaned complete!!!!"
 
 .PHONY: rebuild
 rebuild: clean all
