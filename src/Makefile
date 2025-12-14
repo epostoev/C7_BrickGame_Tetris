@@ -1,3 +1,9 @@
+# Directories
+BUILD_DIR := build
+OBJ_DIR := $(BUILD_DIR)/obj
+LIB_DIR := $(BUILD_DIR)/lib
+BIN_DIR := $(BUILD_DIR)/bin
+
 # Executable
 TARGET := tetris
 TARGET_PATH := $(BIN_DIR)/$(TARGET)
@@ -33,11 +39,6 @@ LDFLAGS := -lncurses
 AR := ar
 ARFLAGS := rcs
 
-# Directories
-BUILD_DIR := build
-OBJ_DIR := $(BUILD_DIR)/obj
-LIB_DIR := $(BUILD_DIR)/lib
-BIN_DIR := $(BUILD_DIR)/bin
 
 # Файлы для включения
 DIST_FILES := \
@@ -46,7 +47,6 @@ DIST_FILES := \
   $(SRC_CLI) \
   $(HDR_CLI) \
   $(HDR_API) \
-  Makefile
 
 
 # Object files
@@ -57,7 +57,7 @@ OBJ_FILES := \
 
 # System directories
 
-INSTALL_BINDIR := ~/.local/bin
+INSTALL_BINDIR := $(HOME)/.local/bin
 
 # Main target: all
 # Builds static library AND executable
@@ -84,10 +84,6 @@ $(OBJ_TETRIS): $(SRC_TETRIS)
 $(TARGET_PATH): $(LIB_TETRIS) $(OBJ_FILES)
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $(OBJ_FILES) $(LIB_TETRIS) -o $@ $(LDFLAGS)
-
-# $(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
-# 	@mkdir -p $(dir $@)
-# 	$(CC) $(CFLAGS) -c $< -o $@
 
 # $< - зависимость
 # $@ - цель
@@ -117,21 +113,53 @@ uninstall:
 	rm -rf $(INSTALL_BINDIR)/$(TARGET)
 	@echo "	Uninstalled from $(INSTALL_BINDIR)/$(TARGET)"
 
+
+# Создание архива
+.PHONY: clean
+dist: clean
+	@tar -czvf ../$(DIST_NAME).tar.gz ./
+	
+format:
+	cp ../materials/linters/.clang-format ./
+	echo "Formating code...."
+	clang-format -i $(DIST_FILES)
+
+format-check:
+	cp ../materials/linters/.clang-format ./
+	echo "Check formating code...."
+	clang-format -n $(DIST_FILES)
+
+TEST := tests/test_tetris
+CHECK_FLAGS := -I $(HOME)/.local/include \
+				-L $(HOME)/.local/lib \
+				-lcheck \
+				-pthread \
+				-lncurses
+test: $(LIB_TETRIS)
+	gcc $(TEST).c $(LIB_TETRIS) -o $(TEST) $(CHECK_FLAGS) 
+
 .PHONY: clean
 clean:
 	@echo "Cleaning....."
 	@rm -rf $(BUILD_DIR)
 	@rm -rf $(LIB_TETRIS) $(OBJ_TETRIS)
 	@rm -rf $(TARGET)
+	@rm -rf $(TEST)
+	@echo "Cleaned complete!!!!"
 
-dist: clean
-	echo "Creating distribution archive..."
-	mkdir -p $(DIST_DIR)
-	mkdir -p /tmp/$(DIST_NAME)
-	cp $(DIST_FILES) /tmp/$(DIST_NAME) #TODO изменить комнду
-	tar -cvzf $(DIST_ARCHIVE) /tmp/$(DIST_NAME)
-	rm -rf /tmp/$(DIST_NAME)
-	echo "✓ Archive created: $(DIST_ARCHIVE)"
+GCOVFLAGS = -fprofile-arcs -ftest-coverage
+REPORT = GcovReport
+
+
+gcov_report:
+	gcc $(GCOVFLAGS) $(TEST).c $(SRC_TETRIS) $(SRC_CLI) $(CHECK_FLAGS) -o $(REPORT)
+	chmod +x $(REPORT)
+	./$(REPORT)
+	lcov -t "$(REPORT)" -o $(REPORT).info -c -d .
+	genhtml -o report $(REPORT).info
+	rm -rf ./*.gcno ./*.gcda ./$(REPORT).*
+	open ./report/index.html
+
 
 
 .PHONY: rebuild
