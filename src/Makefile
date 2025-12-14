@@ -122,12 +122,14 @@ dist: clean
 format:
 	cp ../materials/linters/.clang-format ./
 	echo "Formating code...."
-	clang-format -i $(DIST_FILES)
+	clang-format -i $(DIST_FILES) 
+	clang-format -i $(TEST).c 
 
 format-check:
-	cp ../materials/linters/.clang-format ./
-	echo "Check formating code...."
-	clang-format -n $(DIST_FILES)
+	@cp ../materials/linters/.clang-format ./
+	@echo "Check formating code...."
+	@clang-format -n $(DIST_FILES)
+	@clang-format -n $(TEST).c 
 
 TEST := tests/test_tetris
 CHECK_FLAGS := -I $(HOME)/.local/include \
@@ -136,7 +138,8 @@ CHECK_FLAGS := -I $(HOME)/.local/include \
 				-pthread \
 				-lncurses
 test: $(LIB_TETRIS)
-	gcc $(TEST).c $(LIB_TETRIS) -o $(TEST) $(CHECK_FLAGS) 
+	gcc $(TEST).c $(LIB_TETRIS) -o $(TEST) $(CHECK_FLAGS)
+	./tests/test_tetris 
 
 .PHONY: clean
 clean:
@@ -145,6 +148,8 @@ clean:
 	@rm -rf $(LIB_TETRIS) $(OBJ_TETRIS)
 	@rm -rf $(TARGET)
 	@rm -rf $(TEST)
+	@rm -rf report
+	@rm -rf GcovReport
 	@echo "Cleaned complete!!!!"
 
 GCOVFLAGS = -fprofile-arcs -ftest-coverage
