@@ -23,6 +23,22 @@ START_TEST(test_getTetrisInfo_inital_state) {
   // Act
   // Asset
   ck_assert_ptr_nonnull(state);
+  ck_assert_ptr_nonnull(state->field);
+  ck_assert_ptr_nonnull(state->current);
+  ck_assert_ptr_nonnull(state->next);
+}
+END_TEST
+
+START_TEST(test_getTetrisInfo_field_dimensions) {
+  TetrisState_t* state = getTetrisInfo();
+  
+  // Проверка что поле не NULL
+  ck_assert_ptr_nonnull(state->field);
+  
+  // Проверка что можем обращаться к элементам поля 20x10
+  for (int i = 0; i < 20; i++) {
+    ck_assert_ptr_nonnull(state->field[i]);
+  }
 }
 END_TEST
 
@@ -61,6 +77,7 @@ Suite *tetris_init_suite(void) {
   // Добавление теста в группу тестов.
   tcase_add_checked_fixture(tcase_core, setup, teardown);
   tcase_add_test(tcase_core, test_getTetrisInfo_inital_state);
+  tcase_add_test(tcase_core, test_getTetrisInfo_field_dimensions);
 
   // Добавление теста в тестовый набор.
   suite_add_tcase(suite, tcase_core);
@@ -89,6 +106,7 @@ int main(void) {
   SRunner *suite_runner;
 
   suite_runner = srunner_create(tetris_init_suite());
+  srunner_add_suite(sr, tetris_fsm_start_suite());
 
   srunner_run_all(suite_runner, CK_VERBOSE);
 

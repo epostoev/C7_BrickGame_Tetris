@@ -1,5 +1,6 @@
 {
 	"files.associations": {
-		"brick_game.h": "c"
+		"brick_game.h": "c",
+		"tetris.h": "c"
 	}
 }
